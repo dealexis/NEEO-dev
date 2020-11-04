@@ -1,0 +1,26 @@
+{
+  "name": "Cisco JAD",
+  "manufacturer": "Katana",
+  "version": 1,
+  "type": "HDMISWITCH",
+  "variables": {
+    "IP": "192.168.1.154",
+    "Port": 23
+  },
+  "buttons": {
+    "APPLE TV": {
+      "label": "",
+      "type": "tcp",
+      "command": "http://$IP:8080/remoteCmd?command=KEYCODE_MEDIA_PLAY_PAUSE",
+      "IP": "$IP",
+      "Port": "$Port"
+    },
+    "OPPO BLU RAY": {
+      "label": "",
+      "type": "tcp",
+      "command": "http://$IP:8080/remoteCmd?command=KEYCODE_DPAD_LEFT",
+      "IP": "$IP",
+      "Port": "$Port"
+    }
+  }
+}

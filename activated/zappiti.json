@@ -1,0 +1,71 @@
+{
+  "name": "Zappiti",
+  "manufacturer": "Katana",
+  "version": 16,
+  "type": "TV",
+  "variables": {
+    "IP": "192.168.1.177"
+  },
+  "buttons": {
+    "CHANNEL DOWN": {
+      "label": "",
+      "type": "http-get",
+      "command": "http://$IP:8080/remoteCmd?command=KEYCODE_MEDIA_PLAY_PAUSE"
+    },
+    "CURSOR LEFT": {
+      "label": "",
+      "type": "http-get",
+      "command": "http://$IP:8080/remoteCmd?command=KEYCODE_DPAD_LEFT"
+    },
+    "CURSOR RIGHT": {
+      "label": "",
+      "type": "http-get",
+      "command": "http://$IP:8080/remoteCmd?command=KEYCODE_DPAD_RIGHT"
+    },
+    "CURSOR UP": {
+      "label": "",
+      "type": "http-get",
+      "command": "http://$IP:8080/remoteCmd?command=KEYCODE_DPAD_UP"
+    },
+    "CURSOR DOWN": {
+      "label": "",
+      "type": "http-get",
+      "command": "http://$IP:8080/remoteCmd?command=KEYCODE_DPAD_DOWN"
+    },
+    "CURSOR ENTER": {
+      "label": "",
+      "type": "http-get",
+      "command": "http://$IP:8080/remoteCmd?command=OK"
+    },
+    "BACK": {
+      "label": "",
+      "type": "http-get",
+      "command": "http://$IP:8080/remoteCmd?command=KEYCODE_BACK"
+    },
+    "POWER ON": {
+      "label": "",
+      "type": "http-get",
+      "command": "http://$IP:8080/remoteCmd?command=KEYCODE_WAKEUP"
+    },
+    "POWER OFF": {
+      "label": "",
+      "type": "http-get",
+      "command": "http://$IP:8080/remoteCmd?command=KEYCODE_SLEEP"
+    },
+    "VOLUME UP": {
+      "label": "",
+      "type": "http-get",
+      "command": "http://$IP:8080/remoteCmd?command=KEYCODE_VOLUME_UP"
+    },
+    "VOLUME DOWN": {
+      "label": "",
+      "type": "http-get",
+      "command": "http://$IP:8080/remoteCmd?command=KEYCODE_VOLUME_DOWN"
+    },
+    "MENU": {
+      "label": "",
+      "type": "http-get",
+      "command": "http://$IP:8080/remoteCmd?command=KEYCODE_MENU"
+    }
+  }
+}

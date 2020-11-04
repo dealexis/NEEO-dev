@@ -1,0 +1,74 @@
+{
+  "_from": "github:jac459/metadriver",
+  "_id": "@jac459/metadriver@0.8.15",
+  "_inBundle": false,
+  "_integrity": "",
+  "_location": "/@jac459/metadriver",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "git",
+    "raw": "jac459/metadriver",
+    "rawSpec": "jac459/metadriver",
+    "saveSpec": "github:jac459/metadriver",
+    "fetchSpec": null,
+    "gitCommittish": null
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "github:jac459/metadriver#a11493d2481e677c30ef2b73593444e6b3c60926",
+  "_spec": "jac459/metadriver",
+  "_where": "C:\\Users\\owner\\Desktop\\neeo",
+  "author": {
+    "name": "jac459"
+  },
+  "bugs": {
+    "url": "https://github.com/jac459/metadriver/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "async": "^3.2.0",
+    "fs": "0.0.1-security",
+    "got": "^11.5.2",
+    "http.min": "^2.0.1",
+    "json-rpc2": "^2.0.0",
+    "jsonpath-plus": "^4.0.0",
+    "local-devices": "^3.0.0",
+    "lodash": "^4.17.19",
+    "meta": "^2.2.13",
+    "mqtt": "^4.2.0",
+    "neeo-sdk": "^0.53.8",
+    "socket.io-client": "^2.3.0",
+    "wake_on_lan": "^1.0.0",
+    "xml2js": "^0.4.23",
+    "xmldom": "^0.3.0",
+    "xpath": "0.0.27"
+  },
+  "deprecated": false,
+  "description": "full customizable driver to control any device with neeo (including list and device monitoring)",
+  "devDependencies": {
+    "eslint": "^7.8.1"
+  },
+  "homepage": "https://github.com/jac459/metadriver#readme",
+  "keywords": [
+    "neeo",
+    "meta",
+    "jac"
+  ],
+  "license": "MIT",
+  "main": "meta.js",
+  "name": "@jac459/metadriver",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jac459/metadriver.git"
+  },
+  "scripts": {
+    "start": "node meta.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.8.15"
+}

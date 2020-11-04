@@ -1,0 +1,168 @@
+{
+  "name": "Vu Solo SE2",
+  "manufacturer": "Katana Networks",
+  "type": "TUNER",
+  "version": 10,
+  "register": {
+    "registertype": "SECURITY_CODE",
+    "registerheadertext": "VU SOLO SE2 Received",
+    "registerdescription": "Please enter the IP address of your device.",
+    "registrationcommand": {
+      "type": "http-get",
+      "command": "http://$RegistrationCode/api/deviceinfo",
+      "queryresult": "$.response_code",
+      "evalwrite": [
+        {
+          "variable": "VU_IP",
+          "value": "$RegistrationCode"
+        },
+        {
+          "variable": "IsRegistered",
+          "value": "DYNAMIK ($Result == 0) ? true : false"
+        }
+      ],
+      "headers": {
+        "Authorization": "Basic cm9vdDo="
+      }
+    }
+  },
+  "discover": {
+    "welcomeheadertext": "VU Solo SE2",
+    "welcomedescription": "powered by MrsKisKis",
+    "command": {
+      "type": "http-get",
+      "command": "http://$VU_IP/api/about",
+      "queryresult": "$."
+    },
+    "headers": {
+      "Authorization": "Basic cm9vdDo="
+    }
+  },
+  "persistedvariables": {
+    "RegistrationCode": "",
+    "VU_IP": "",
+    "IsRegistered": ""
+  },
+  "template": {
+    "name": "Vu Solo SE2",
+    "dynamicname": "Vu Solo SE2",
+    "dynamicid": "Satellite",
+    "manufacturer": "VU Solo",
+    "version": 10,
+    "type": "TUNER",
+    "buttons": {
+      "CURSOR LEFT": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$VU_IP/api/remotecontrol?command=412",
+        "headers": {
+          "Authorization": "Basic cm9vdDo="
+        }
+      },
+      "CURSOR RIGHT": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$VU_IP/api/remotecontrol?command=407",
+        "headers": {
+          "Authorization": "Basic cm9vdDo="
+        }
+      },
+      "CURSOR UP": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$VU_IP/api/remotecontrol?command=103",
+        "headers": {
+          "Authorization": "Basic cm9vdDo="
+        }
+      },
+      "CURSOR DOWN": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$VU_IP/api/remotecontrol?command=108",
+        "headers": {
+          "Authorization": "Basic cm9vdDo="
+        }
+      },
+      "CURSOR ENTER": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$VU_IP/api/remotecontrol?command=352",
+        "headers": {
+          "Authorization": "Basic cm9vdDo="
+        }
+      },
+      "CHANNEL UP": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$VU_IP/api/remotecontrol?command=103",
+        "headers": {
+          "Authorization": "Basic cm9vdDo="
+        }
+      },
+      "CHANNEL DOWN": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$VU_IP/api/remotecontrol?command=108",
+        "headers": {
+          "Authorization": "Basic cm9vdDo="
+        }
+      },
+      "MENU": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$VU_IP/api/remotecontrol?command=139",
+        "headers": {
+          "Authorization": "Basic cm9vdDo="
+        }
+      },
+      "BACK": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$VU_IP/api/remotecontrol?command=174",
+        "headers": {
+          "Authorization": "Basic cm9vdDo="
+        }
+      },
+      "VOLUME UP": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$VU_IP/api/vol?set=up",
+        "headers": {
+          "Authorization": "Basic cm9vdDo="
+        }
+      },
+      "VOLUME DOWN": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$VU_IP/api/vol?set=down",
+        "headers": {
+          "Authorization": "Basic cm9vdDo="
+        }
+      },
+      "MUTE TOGGLE": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$VU_IP/api/vol?set=mute",
+        "headers": {
+          "Authorization": "Basic cm9vdDo="
+        }
+      },
+      "POWER ON": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$VU_IP/api/powerstate?newstate=4",
+        "headers": {
+          "Authorization": "Basic cm9vdDo="
+        }
+      },
+      "POWER OFF": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$VU_IP/api/powerstate?newstate=5",
+        "headers": {
+          "Authorization": "Basic cm9vdDo="
+        }
+      }
+    }
+  }
+}
