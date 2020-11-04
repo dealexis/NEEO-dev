@@ -868,12 +868,22 @@ class tcpProcessor {
             console.log(connection)
 
             const client = new net.Socket();
-            client.connect({
+             client.connect({
                 port: connection.port,
                 host: connection.descriptor,
             }, () => {
                 resolve(connection);
             });
+            //CORRECTION_JAC: connection.tcp
+            //client.connect({
+            //    port: connection.tcp.port,
+            //    host: connection.tcp.Ip,
+            //}, () => {
+            //    resolve(connection);
+            //});
+            // CORRECTION_JAC: in connection you save the connection you have created, in your case client. You will be able to reuse it later.
+            
+            //connection.creator = client;
 
         });
     }
