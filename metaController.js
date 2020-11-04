@@ -310,6 +310,8 @@ module.exports = function controller(driver) {
 
 
   this.commandProcessor = function(command, commandtype, deviceId, headers, ip, port) { // process any command according to the target protocole
+//CORRECTION_JAC No need to put ip and port, check the processing manager to see why
+ //  this.commandProcessor = function(command, commandtype, deviceId, headers) { // process any command according to the target protocole
 
     console.log(chalk.white.bgBlue.bold(' COMMAND PROCESSOR '))
     console.log(chalk.green('HEADERS:') + headers)
