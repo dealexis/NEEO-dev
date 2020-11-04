@@ -372,7 +372,6 @@ function executeDriversCreation(drivers, hubController, deviceId) { //drivers is
                             register: (credentials) => getResgristrationCode(controller, credentials, driver, currentDeviceId),
                             isRegistered: () => {
                                 return new Promise(function (resolve, reject) {
-                                    console.log("bloublou");
                                     isDeviceRegistered(controller, driver, currentDeviceId).then((res) => {
                                         resolve(res)
                                     })
@@ -391,6 +390,11 @@ function executeDriversCreation(drivers, hubController, deviceId) { //drivers is
                 if (driver.tcp) {
                     controller.addConnection({"name": "tcp", "descriptor": driver.tcp, "connector": "", "port": driver.port})
                 }
+  //CORRECTION_JAC ==> Into the descriptor you put both the tcp and the port. You can't change the signature of the addconnection. Look at your device TCP I also changed the code
+  //               if (driver.tcp) {
+  //                  controller.addConnection({"name": "tcp", "descriptor": driver.tcp, "connector": ""})
+  //              }
+                
                 if (driver.mqtt) {
                     controller.addConnection({"name": "mqtt", "descriptor": driver.mqtt, "connector": ""})
                 }
