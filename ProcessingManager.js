@@ -27,6 +27,22 @@ class ProcessingManager {
     }
 
     initiate(connection) {
+
+        console.log(chalk.white.bgBlue.bold(' CLASS: Processing Manager '))
+        console.log(chalk.white.bgBlue.bold(' METHOD: initiate'))
+
+        console.log(connection);
+
+            // console.log(chalk.green(f + ':') + params[f])
+            // //console.log('VALUE:' + params[f])
+            // console.log(typeof params[f]);
+            // if(typeof params[f] == 'object'){
+            //     params[f].forEach((element, index) => {
+            //         console.log(chalk.red.bold('[' + index + '] = ' + element))
+            //     })
+            // }
+
+
         return new Promise((resolve, reject) => {
             this._processor.initiate(connection)
                 .then((result) => {
@@ -41,23 +57,30 @@ class ProcessingManager {
 
             console.log('-------------------------')
 
-            console.log(chalk.white.bgBlue(" CLASS: ProcessingManager "))
+            console.log(chalk.white.bgBlue.bold(" CLASS: ProcessingManager "))
             console.log("METHOD: process")
-            console.log(chalk.white.bgBlue(' PARAMS '))
-            for(var f in params){
-                console.log(f  + ':' + typeof params[f])
-                console.log('VALUE:' + params[f])
+            console.log(chalk.white.bgBlue.bold(' PARAMS '))
+            for (var f in params) {
+                console.log(chalk.green(f + ':') + params[f])
+                //console.log('VALUE:' + params[f])
+                console.log(params[f]);
+                console.log(typeof params[f]);
+                // if(typeof params[f] == 'object'){
+                //     params[f].forEach((element, index) => {
+                //         console.log(chalk.red.bold('[' + index + '] = ' + element))
+                //     })
+                // }
             }
 
-            console.log('THIS PROCESSOR: ' + this._processor.constructor.name);
+            console.log(chalk.black.bgBlue.bold(' THIS PROCESSOR: ') + this._processor.constructor.name);
 
             this._processor.process(params)
                 .then((result) => {
-                    console.log('RESULT:' + result);
+                    console.log(chalk.bgGreen('RESULT:') + result);
                     resolve(result);
                 })
                 .catch((err) => {
-                    console.log('ERROR OCCURRED:' + err)
+                    console.log(chalk.red('ERROR OCCURRED:') + err)
                     reject(err);
                 });
         });
@@ -213,8 +236,8 @@ class httpgetProcessor {
 
             console.log('params:' + params + ' length:' + params.length)
 
-            for(var f in params){
-                console.log(f  + ' ' + typeof params[f])
+            for (var f in params) {
+                console.log(f + ' ' + typeof params[f])
                 console.log(params[f])
             }
 
@@ -225,7 +248,7 @@ class httpgetProcessor {
 
             console.log('headers:' + params.headers)
 
-            if(params.headers){
+            if (params.headers) {
                 options.headers = params.headers
             }
 
@@ -763,7 +786,7 @@ function stringToHex(text) {
     return converted.join(', ');
 }
 
-class tcpProcessor {
+class tcpProcessor_old {
     constructor() {
     }
 
@@ -776,14 +799,14 @@ class tcpProcessor {
     process(params) {
         return new Promise(function (resolve, reject) {
 
-            console.log('============ CLASS: '+ chalk.white.bgBlue(' tcpProcessor ') +'==============')
+            console.log('============ CLASS: ' + chalk.white.bgBlue(' tcpProcessor ') + '==============')
 
-            for(var f in params){
-                console.log(chalk.green(f)  + ' : ' + typeof params[f])
+            for (var f in params) {
+                console.log(chalk.green(f) + ' : ' + typeof params[f])
                 console.log(params[f])
             }
 
-            if(!params.port && !params.host) reject();
+            if (!params.port && !params.host) reject();
 
             const client = new net.Socket();
             client.connect({
@@ -834,6 +857,86 @@ class tcpProcessor {
                 resolve(params.data);
             }
         });
+    }
+
+}
+
+class tcpProcessor {
+    initiate(connection) {
+        return new Promise(function (resolve, reject) {
+            console.log(chalk.red.bgCyanBright('CONNECTION'))
+            console.log(connection)
+
+            const client = new net.Socket();
+            client.connect({
+                port: connection.port,
+                host: connection.descriptor,
+            }, () => {
+                resolve(connection);
+            });
+
+        });
+    }
+
+    process(params) {
+        return new Promise((resolve, reject) => {
+            /*if (typeof (params.command) == 'string') {
+                params.command = JSON.parse(params.command);
+            }*/
+            /*if (params.command.call) {
+                params.connection.connector.call(params.command.call, params.command.message, function (err, result) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    resolve(result);
+                });
+
+            }*/
+
+            //client write
+
+        });
+    }
+
+    query(params) {
+        return new Promise(function (resolve, reject) {
+            console.log(chalk.white.bgBlue.bold(' QUERY PARAMS '))
+            console.log(params)
+            resolve();
+        });
+    }
+
+    startListen(params, deviceId) {
+        return new Promise(function (resolve, reject) {
+            console.log(chalk.white.bgBlue.bold(' Starting to listen to the device. PARAMS: '));
+            console.log(params);
+            /*params.socketIO.on(params.command, (result) => {
+                params._listenCallback(result, params.listener, deviceId);
+            });*/
+
+            /*params.net.on('data', function (chunk) {
+                console.log('Data received: ' + chunk);
+
+                var str = chunk.toString();
+                if (str.match(/User Name:/)) {
+                    client.write("cisco\n")
+                    return;
+                }
+                if (str.match(/Password:/)) {
+                    client.write("cisco\n")
+                    return;
+                }
+            })*/
+
+            resolve();
+        });
+    }
+
+    stopListen(params) {
+        console.log(chalk.white.bgBlue.bold(' Stop listening to the device. PARAMS: '));
+        console.log(params);
+        //    TODO stop listening
+        //    listener.io.disconnect(listener.socket);
     }
 
 }

@@ -309,10 +309,9 @@ module.exports = function controller(driver) {
   };
 
 
-  this.commandProcessor = function(command, commandtype, deviceId, headers, ip, port, func) { // process any command according to the target protocole
+  this.commandProcessor = function(command, commandtype, deviceId, headers, ip, port) { // process any command according to the target protocole
 
     console.log(chalk.white.bgBlue.bold(' COMMAND PROCESSOR '))
-    console.log('=================')
     console.log(chalk.green('HEADERS:') + headers)
     console.log(chalk.green('COMMAND:') + command)
     console.log(chalk.green('COMMAND_TYPE:') + commandtype)
@@ -323,6 +322,10 @@ module.exports = function controller(driver) {
 
       self.assignProcessor(commandtype);
       const connection = self.getConnection(commandtype);
+
+      console.log(chalk.white.bgBlue.bold(' getConnection '))
+      console.log(connection);
+
       command = self.vault.readVariables(command, deviceId);
       command = self.assignTo(RESULT, command, '');
       const params = {
@@ -332,9 +335,8 @@ module.exports = function controller(driver) {
 
       switch (commandtype) {
         case 'tcp':
-          params.ip = ip;
-          params.port = port;
-          if(func) params.func = func;
+          if(ip) params.ip = ip;
+          if(port) params.port = port;
           break;
         case 'http-get':
           if(headers) params.headers = headers;
@@ -452,14 +454,14 @@ module.exports = function controller(driver) {
     });
   };
 
-  this.actionManager = function (deviceId, commandtype, command, queryresult, evaldo, evalwrite, headers, ip, port, func) {
+  this.actionManager = function (deviceId, commandtype, command, queryresult, evaldo, evalwrite, headers, ip, port) {
 
-    console.log(chalk.white.bgBlue(' METHOD: actionManager '))
+    console.log(chalk.white.bgBlue.bold(' METHOD: actionManager '))
 
     return new Promise(function (resolve, reject) {
       try {
         console.log(command+ ' - ' + commandtype);
-        self.commandProcessor(command, commandtype, deviceId, headers, ip, port, func)
+        self.commandProcessor(command, commandtype, deviceId, headers, ip, port)
         .then((result) => {
           self.queryProcessor(result, queryresult, commandtype, deviceId).then((result) => {
           //self.queryProcessor(result, queryresult, commandtype, deviceId, headers).then((result) => {
@@ -503,7 +505,7 @@ module.exports = function controller(driver) {
 
   this.onButtonPressed = function(name, deviceId) {
 
-    console.log(chalk.white.bgBlue(' METHOD: onButtonPressed '));
+    console.log(chalk.white.bgBlue.bold(' METHOD: onButtonPressed '));
 
     console.log('[CONTROLLER]' + name + ' button pressed for device ' + deviceId);
     if (name == 'INITIALISE') {//Device resources and connection management.
@@ -527,7 +529,7 @@ module.exports = function controller(driver) {
         if (theButton.command != undefined){
           self.actionManager(deviceId, theButton.type, theButton.command, theButton.queryresult, theButton.evaldo, theButton.evalwrite, theButton.headers, theButton.ip, theButton.port)
           .then(()=>{
-            console.log('============  ' + chalk.white.bgGreen('ACTION DONE') + '  ============');
+            console.log('============  ' + chalk.white.bgGreen.bold(' ACTION DONE ') + '  ============');
           })
           .catch((err) => {
               console.log('Error when processing the command : ' + err);
