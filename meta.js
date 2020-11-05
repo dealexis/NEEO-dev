@@ -387,13 +387,10 @@ function executeDriversCreation(drivers, hubController, deviceId) { //drivers is
                 if (driver.jsontcp) {
                     controller.addConnection({"name": "jsontcp", "descriptor": driver.jsontcp, "connector": ""})
                 }
+
                 if (driver.tcp) {
-                    controller.addConnection({"name": "tcp", "descriptor": driver.tcp, "connector": "", "port": driver.port})
+                    controller.addConnection({"name": "tcp", "descriptor": driver.tcp, "connector": ""})
                 }
-  //CORRECTION_JAC ==> Into the descriptor you put both the tcp and the port. You can't change the signature of the addconnection. Look at your device TCP I also changed the code
-  //               if (driver.tcp) {
-  //                  controller.addConnection({"name": "tcp", "descriptor": driver.tcp, "connector": ""})
-  //              }
                 
                 if (driver.mqtt) {
                     controller.addConnection({"name": "mqtt", "descriptor": driver.mqtt, "connector": ""})

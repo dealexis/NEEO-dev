@@ -31,16 +31,16 @@ class ProcessingManager {
         console.log(chalk.white.bgBlue.bold(' CLASS: Processing Manager '))
         console.log(chalk.white.bgBlue.bold(' METHOD: initiate'))
 
-        console.log(connection);
+        console.log(connection.command);
 
-            // console.log(chalk.green(f + ':') + params[f])
-            // //console.log('VALUE:' + params[f])
-            // console.log(typeof params[f]);
-            // if(typeof params[f] == 'object'){
-            //     params[f].forEach((element, index) => {
-            //         console.log(chalk.red.bold('[' + index + '] = ' + element))
-            //     })
-            // }
+        // console.log(chalk.green(f + ':') + params[f])
+        // //console.log('VALUE:' + params[f])
+        // console.log(typeof params[f]);
+        // if(typeof params[f] == 'object'){
+        //     params[f].forEach((element, index) => {
+        //         console.log(chalk.red.bold('[' + index + '] = ' + element))
+        //     })
+        // }
 
 
         return new Promise((resolve, reject) => {
@@ -279,7 +279,7 @@ class httpgetProcessor {
                     if (typeof (params.data) == 'string') {
                         params.data = JSON.parse(params.data);
                     }
-                    ;
+
                     resolve(JSONPath(params.query, params.data));
                 } catch (err) {
                     console.log('error ' + err + ' in JSONPATH ' + params.query + ' processing of :');
@@ -766,6 +766,154 @@ class mqttProcessor {
 
 exports.mqttProcessor = mqttProcessor;
 
+
+class tcpProcessor {
+    initiate(connection) {
+        return new Promise(function (resolve, reject) {
+            console.log(chalk.red('---initiate---CONNECTION---'))
+            console.log(connection.descriptor)
+
+            var credentials = connection.descriptor,
+                onConnectFunc = connection.descriptor.onConnectFunc;
+
+            try {
+                credentials = JSON.parse(credentials);
+                connection.descriptor = credentials;
+            } catch (e) {
+                console.log(chalk.red('Connection descriptor is not a JSON'))
+                reject();
+            }
+
+            const client = new net.Socket();
+            new Promise((resolve, reject) => {
+                client.connect({
+                    port: parseInt(credentials.Port),
+                    host: credentials.Ip,
+                }, () => {
+                    console.log(chalk.green('TCP connection initialized'));
+                    resolve();
+                });
+                setTimeout(() => {
+                    reject();
+                }, 1000)
+            });
+
+            client.on('data', function (chunk) {
+                console.log( 'Data received: ' + chunk);
+
+                var str = chunk.toString();
+                if(str.match(/User Name:/)){
+                    client.write("cisco\n")
+                }
+                if(str.match(/Password:/)){
+                    client.write("cisco\n")
+                }
+
+            });
+
+            connection.connector = client;
+            resolve(connection);
+
+            /*if (onConnectFunc) {
+                connect.then(() => {
+
+                    console.log(chalk.yellow('i wanna suck'))
+                    /!*
+                    * eval don't work( I think it can't see variables like "client"
+                    * *!/
+                    //eval(onConnectFunc);
+
+                    client.on('data', function (chunk) {
+                        console.log( 'Data received: ' + chunk);
+
+                        var str = chunk.toString();
+                        if(str.match(/User Name:/)){
+                            client.write("cisco\n")
+                        }
+                        if(str.match(/Password:/)){
+                            client.write("cisco\n")
+                        }
+
+                    });
+
+                    connection.connector = client;
+                    resolve(connection);
+
+                }).catch(() => {
+                    console.log('REJECTED')
+                });
+            } else {
+                connect.then(() => {
+                    connection.connector = client;
+                    resolve(connection);
+                }).catch(() => {
+                    console.log('REJECTED')
+                });
+            }*/
+
+        });
+    }
+
+    process(params) {
+        return new Promise((resolve, reject) => {
+
+            console.log(chalk.white.bgRed.bold(' PROCESS TCP PARAMS '))
+            console.log(chalk.red(params.command + typeof params.command))
+
+            console.log(params)
+
+            if (!params.connection.connector) {
+                console.log(chalk.red('REJECTED: Connection is impossible. Check both IP and Port'))
+                reject();
+                return;
+            }
+
+            switch (typeof params.command) {
+                case 'object':
+                    var iteration = 0,
+                        cmd = params.command;
+                    for (var i = 0; i < cmd.length; i++) {
+                        new Promise((resolve, reject) => {
+                            setTimeout(function () {
+                                console.log(chalk.green(iteration))
+                                console.log(chalk.red(cmd[iteration]))
+
+                                params.connection.connector.write(cmd[iteration]);
+
+                                iteration++;
+                            }, i * 50)
+                            resolve();
+                        });
+                    }
+                    break;
+                case 'string':
+                    if (params.command.match(/HEX:/)) {
+                        params.command = params.command.replace('HEX:', '');
+                        params.connection.connector.write(stringToHex(params.command));
+                    } else {
+                        params.connection.connector.write(params.command);
+                    }
+                    break;
+            }
+
+            resolve();
+
+        });
+    }
+
+    query(params) {
+        return new Promise(function (resolve, reject) {
+            console.log(chalk.white.bgBlue.bold(' QUERY PARAMS '))
+            console.log(params)
+            resolve();
+        });
+    }
+
+}
+
+exports.tcpProcessor = tcpProcessor;
+
+
 function stringToHex(text) {
     var bytes = [];
 
@@ -783,172 +931,7 @@ function stringToHex(text) {
         converted.push(byte);
     }
 
+    converted.push(0x0a);
+
     return converted.join(', ');
 }
-
-class tcpProcessor_old {
-    constructor() {
-    }
-
-    initiate(connection) {
-        return new Promise(function (resolve, reject) {
-            resolve();
-        });
-    }
-
-    process(params) {
-        return new Promise(function (resolve, reject) {
-
-            console.log('============ CLASS: ' + chalk.white.bgBlue(' tcpProcessor ') + '==============')
-
-            for (var f in params) {
-                console.log(chalk.green(f) + ' : ' + typeof params[f])
-                console.log(params[f])
-            }
-
-            if (!params.port && !params.host) reject();
-
-            const client = new net.Socket();
-            client.connect({
-                host: params.ip,
-                port: parseInt(params.port),
-            }, function () {
-
-                console.log(chalk.green.bold('SEND COMMAND:') + params.command);
-                console.log(chalk.green.bold('IP') + params.ip);
-                console.log(chalk.green.bold('Port:') + params.port);
-
-                //client.write(new Uint8Array([0x73, 0x65, 0x6e, 0x64, 0x69, 0x72, 0x2c, 0x31, 0x3a, 0x32, 0x2c, 0x34, 0x2c, 0x33, 0x38, 0x30, 0x30, 0x30, 0x2c, 0x31, 0x2c, 0x31, 0x2c, 0x33, 0x34, 0x32, 0x2c, 0x31, 0x37, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x36, 0x32, 0x2c, 0x32, 0x32, 0x2c, 0x36, 0x32, 0x2c, 0x32, 0x32, 0x2c, 0x36, 0x32, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x36, 0x32, 0x2c, 0x32, 0x32, 0x2c, 0x36, 0x32, 0x2c, 0x32, 0x32, 0x2c, 0x36, 0x32, 0x2c, 0x32, 0x32, 0x2c, 0x36, 0x32, 0x2c, 0x32, 0x32, 0x2c, 0x36, 0x32, 0x2c, 0x32, 0x32, 0x2c, 0x36, 0x32, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x36, 0x32, 0x2c, 0x32, 0x32, 0x2c, 0x36, 0x32, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x36, 0x32, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x36, 0x32, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x32, 0x30, 0x2c, 0x32, 0x32, 0x2c, 0x37, 0x36, 0x30, 0x0d]) );
-                var cmd = stringToHex(params.command).split(', ');
-                cmd.push(0x0d);
-
-                client.write(new Uint8Array(cmd));
-
-                resolve();
-
-            });
-
-            client.on('data', function (chunk) {
-                console.log(chalk.red('Data received: ' + chunk));
-                client.end();
-            });
-
-            client.on('end', function () {
-                console.log(chalk.red('END'));
-            });
-
-        });
-    }
-
-    query(params) {
-        return new Promise(function (resolve, reject) {
-            if (params.query) {
-                try {
-                    if (typeof (params.data) == 'string') {
-                        params.data = JSON.parse(params.data);
-                    }
-
-                    resolve(JSONPath(params.query, params.data));
-                } catch (err) {
-                    console.log('error ' + err + ' in JSONPATH ' + params.query + ' processing of :');
-                    console.log(params.data);
-                }
-            } else {
-                resolve(params.data);
-            }
-        });
-    }
-
-}
-
-class tcpProcessor {
-    initiate(connection) {
-        return new Promise(function (resolve, reject) {
-            console.log(chalk.red.bgCyanBright('CONNECTION'))
-            console.log(connection)
-
-            const client = new net.Socket();
-             client.connect({
-                port: connection.port,
-                host: connection.descriptor,
-            }, () => {
-                resolve(connection);
-            });
-            //CORRECTION_JAC: connection.tcp
-            //client.connect({
-            //    port: connection.tcp.port,
-            //    host: connection.tcp.Ip,
-            //}, () => {
-            //    resolve(connection);
-            //});
-            // CORRECTION_JAC: in connection you save the connection you have created, in your case client. You will be able to reuse it later.
-            
-            //connection.creator = client;
-
-        });
-    }
-
-    process(params) {
-        return new Promise((resolve, reject) => {
-            /*if (typeof (params.command) == 'string') {
-                params.command = JSON.parse(params.command);
-            }*/
-            /*if (params.command.call) {
-                params.connection.connector.call(params.command.call, params.command.message, function (err, result) {
-                    if (err) {
-                        console.log(err);
-                    }
-                    resolve(result);
-                });
-
-            }*/
-
-            //client write
-
-        });
-    }
-
-    query(params) {
-        return new Promise(function (resolve, reject) {
-            console.log(chalk.white.bgBlue.bold(' QUERY PARAMS '))
-            console.log(params)
-            resolve();
-        });
-    }
-
-    startListen(params, deviceId) {
-        return new Promise(function (resolve, reject) {
-            console.log(chalk.white.bgBlue.bold(' Starting to listen to the device. PARAMS: '));
-            console.log(params);
-            /*params.socketIO.on(params.command, (result) => {
-                params._listenCallback(result, params.listener, deviceId);
-            });*/
-
-            /*params.net.on('data', function (chunk) {
-                console.log('Data received: ' + chunk);
-
-                var str = chunk.toString();
-                if (str.match(/User Name:/)) {
-                    client.write("cisco\n")
-                    return;
-                }
-                if (str.match(/Password:/)) {
-                    client.write("cisco\n")
-                    return;
-                }
-            })*/
-
-            resolve();
-        });
-    }
-
-    stopListen(params) {
-        console.log(chalk.white.bgBlue.bold(' Stop listening to the device. PARAMS: '));
-        console.log(params);
-        //    TODO stop listening
-        //    listener.io.disconnect(listener.socket);
-    }
-
-}
-
-exports.tcpProcessor = tcpProcessor;
