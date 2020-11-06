@@ -31,7 +31,7 @@ class ProcessingManager {
         console.log(chalk.white.bgBlue.bold(' CLASS: Processing Manager '))
         console.log(chalk.white.bgBlue.bold(' METHOD: initiate'))
 
-        console.log(connection.command);
+        //console.log(connection.command);
 
         // console.log(chalk.green(f + ':') + params[f])
         // //console.log('VALUE:' + params[f])
@@ -60,17 +60,17 @@ class ProcessingManager {
             console.log(chalk.white.bgBlue.bold(" CLASS: ProcessingManager "))
             console.log("METHOD: process")
             console.log(chalk.white.bgBlue.bold(' PARAMS '))
-            for (var f in params) {
-                console.log(chalk.green(f + ':') + params[f])
+            /*for (var f in params) {
+                //console.log(chalk.green(f + ':') + params[f])
                 //console.log('VALUE:' + params[f])
-                console.log(params[f]);
-                console.log(typeof params[f]);
+                //console.log(params[f]);
+                //console.log(typeof params[f]);
                 // if(typeof params[f] == 'object'){
                 //     params[f].forEach((element, index) => {
                 //         console.log(chalk.red.bold('[' + index + '] = ' + element))
                 //     })
                 // }
-            }
+            }*/
 
             console.log(chalk.black.bgBlue.bold(' THIS PROCESSOR: ') + this._processor.constructor.name);
 
@@ -770,86 +770,65 @@ exports.mqttProcessor = mqttProcessor;
 class tcpProcessor {
     initiate(connection) {
         return new Promise(function (resolve, reject) {
-            console.log(chalk.red('---initiate---CONNECTION---'))
-            console.log(connection.descriptor)
+            console.log(chalk.red('---initiate---tcpProcessor---'))
 
-            var credentials = connection.descriptor,
-                onConnectFunc = connection.descriptor.onConnectFunc;
+            var descriptor = connection.descriptor;
 
             try {
-                credentials = JSON.parse(credentials);
-                connection.descriptor = credentials;
+                descriptor = JSON.parse(descriptor);
+                connection.descriptor = descriptor;
+                var onConnectFunc = connection.descriptor.onConnectFunc;
+
+                //console.log(chalk.red(onConnectFunc))
+                //onConnectFunc ? console.log(chalk.green('onconnect true')) : console.log(chalk.red('onconnect false'));
+
+                const client = new net.Socket();
+                const connect = new Promise((resolve, reject) => {
+                    client.connect({
+                        port: parseInt(descriptor.Port),
+                        host: descriptor.Ip,
+                    }, () => {
+                        console.log(chalk.green('TCP connection initialized'));
+                        resolve();
+                    });
+                });
+
+                /*
+                * if you don't need to handshake you can skip this property in driver config file
+                * */
+                if (onConnectFunc) {
+                    connect.then(() => {
+
+                        /*
+                        * you can write your own handler to handshake with device when connection is init
+                        * */
+                        eval(onConnectFunc);
+
+                        connection.connector = client;
+                        resolve(connection);
+
+                    }).catch(() => {
+                        console.log('REJECTED')
+                    });
+                } else {
+                    connect.then(() => {
+                        connection.connector = client;
+                        resolve(connection);
+                    }).catch(() => {
+                        console.log('REJECTED')
+                    });
+                }
+
             } catch (e) {
                 console.log(chalk.red('Connection descriptor is not a JSON'))
+
+                /*
+                * when connection config is not a JSON do something else
+                * may be this case is not necessary
+                * */
+
                 reject();
             }
-
-            const client = new net.Socket();
-            new Promise((resolve, reject) => {
-                client.connect({
-                    port: parseInt(credentials.Port),
-                    host: credentials.Ip,
-                }, () => {
-                    console.log(chalk.green('TCP connection initialized'));
-                    resolve();
-                });
-                setTimeout(() => {
-                    reject();
-                }, 1000)
-            });
-
-            client.on('data', function (chunk) {
-                console.log( 'Data received: ' + chunk);
-
-                var str = chunk.toString();
-                if(str.match(/User Name:/)){
-                    client.write("cisco\n")
-                }
-                if(str.match(/Password:/)){
-                    client.write("cisco\n")
-                }
-
-            });
-
-            connection.connector = client;
-            resolve(connection);
-
-            /*if (onConnectFunc) {
-                connect.then(() => {
-
-                    console.log(chalk.yellow('i wanna suck'))
-                    /!*
-                    * eval don't work( I think it can't see variables like "client"
-                    * *!/
-                    //eval(onConnectFunc);
-
-                    client.on('data', function (chunk) {
-                        console.log( 'Data received: ' + chunk);
-
-                        var str = chunk.toString();
-                        if(str.match(/User Name:/)){
-                            client.write("cisco\n")
-                        }
-                        if(str.match(/Password:/)){
-                            client.write("cisco\n")
-                        }
-
-                    });
-
-                    connection.connector = client;
-                    resolve(connection);
-
-                }).catch(() => {
-                    console.log('REJECTED')
-                });
-            } else {
-                connect.then(() => {
-                    connection.connector = client;
-                    resolve(connection);
-                }).catch(() => {
-                    console.log('REJECTED')
-                });
-            }*/
 
         });
     }
@@ -857,10 +836,11 @@ class tcpProcessor {
     process(params) {
         return new Promise((resolve, reject) => {
 
+            console.log(chalk.white.bgBlue.bold(this.constructor.name))
             console.log(chalk.white.bgRed.bold(' PROCESS TCP PARAMS '))
-            console.log(chalk.red(params.command + typeof params.command))
+            //console.log(chalk.red(params.command + typeof params.command))
 
-            console.log(params)
+            //console.log(params)
 
             if (!params.connection.connector) {
                 console.log(chalk.red('REJECTED: Connection is impossible. Check both IP and Port'))
@@ -870,29 +850,40 @@ class tcpProcessor {
 
             switch (typeof params.command) {
                 case 'object':
+
+                    /*
+                    * Sending tcp commands should be step by step,
+                    * with micro latency
+                    * */
+
                     var iteration = 0,
                         cmd = params.command;
                     for (var i = 0; i < cmd.length; i++) {
-                        new Promise((resolve, reject) => {
-                            setTimeout(function () {
-                                console.log(chalk.green(iteration))
-                                console.log(chalk.red(cmd[iteration]))
+                        setTimeout(function () {
+                            // console.log(chalk.green(iteration))
+                            // console.log(chalk.red(cmd[iteration]))
 
-                                params.connection.connector.write(cmd[iteration]);
+                            params.connection.connector.write(cmd[iteration]);
 
-                                iteration++;
-                            }, i * 50)
-                            resolve();
-                        });
+                            iteration++;
+                        }, i * 50)
                     }
                     break;
                 case 'string':
-                    if (params.command.match(/HEX:/)) {
+
+                    console.log(chalk.bgYellow.red.bold('ALARM STRING'))
+                    /*
+                    * I think send hex to net package is not necessary
+                    * */
+                    /*if (params.command.match(/HEX:/)) {
                         params.command = params.command.replace('HEX:', '');
-                        params.connection.connector.write(stringToHex(params.command));
-                    } else {
-                        params.connection.connector.write(params.command);
-                    }
+
+                        console.log(chalk.red.bold(stringToHex(params.command)))
+
+                        params.connection.connector.write(params.command + "\r");
+                    } else {}*/
+                    params.connection.connector.write(params.command + "\r");
+
                     break;
             }
 
@@ -912,26 +903,3 @@ class tcpProcessor {
 }
 
 exports.tcpProcessor = tcpProcessor;
-
-
-function stringToHex(text) {
-    var bytes = [];
-
-    for (var i = 0; i < text.length; i++) {
-        var realBytes = unescape(encodeURIComponent(text[i]));
-        for (var j = 0; j < realBytes.length; j++) {
-            bytes.push(realBytes[j].charCodeAt(0));
-        }
-    }
-
-    var converted = [];
-    for (var i = 0; i < bytes.length; i++) {
-        var byte = bytes[i].toString(16);
-        byte = "0x" + byte;
-        converted.push(byte);
-    }
-
-    converted.push(0x0a);
-
-    return converted.join(', ');
-}

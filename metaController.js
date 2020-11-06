@@ -339,7 +339,7 @@ module.exports = function controller(driver) {
             const connection = self.getConnection(commandtype);
 
             console.log(chalk.white.bgBlue.bold(' getConnection '))
-            console.log(connection.command);
+            //console.log(connection.command);
 
             if(typeof command !== 'object'){
                 command = self.vault.readVariables(command, deviceId);

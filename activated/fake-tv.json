@@ -1,0 +1,13 @@
+{
+  "name": "Fake TV",
+  "manufacturer": "Katana",
+  "version": 1,
+  "type": "TV",
+  "buttons": {
+    "CURSOR ENTER": {
+      "label": "",
+      "type": "http-get",
+      "command": ""
+    }
+  }
+}

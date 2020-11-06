@@ -5,7 +5,7 @@
   "type": "HDMISWITCH",
   "tcp": {
     "Ip":"$IP", "Port":"$Port",
-    "onConnectFunc": "client.on('data', function (chunk) {\n                    console.log( 'Data received: ' + chunk);\n\n                    var str = chunk.toString();\n                    if(str.match(/User Name:/)){\n                        client.write(\"cisco\\n\")\n                    }\n                    if(str.match(/Password:/)){\n                        client.write(\"cisco\\n\")\n                    }\n\n                });"
+    "onConnectFunc": "client.on('data', function (chunk) {\n                        console.log( 'Data received: ' + chunk);\n\n                        var str = chunk.toString();\n                        if(str.match(/User Name:/)){\n                            client.write(\"cisco\\n\")\n                        }\n                        if(str.match(/Password:/)){\n                            client.write(\"cisco\\n\")\n                        }\n\n                    });"
   },
   "variables": {
     "IP": "192.168.1.154",
