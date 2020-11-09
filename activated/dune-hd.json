@@ -1,0 +1,93 @@
+{
+  "name": "Dune HD Kitchen",
+  "manufacturer": "Katana Networks",
+  "type": "TUNER",
+  "version": 2,
+  "variables": {
+    "IP": "192.168.1.225"
+  },
+  "discover": {
+    "welcomeheadertext": "Dune HD Kitchen",
+    "welcomedescription": "powered by MrsKisKis",
+    "command": {
+      "type": "http-get",
+      "command": "http://$NeeoBrainIP:3000/v1/projects/home/rooms/",
+      "queryresult": "$."
+    }
+  },
+  "template": {
+    "name": "Dune HD Kitchen",
+    "dynamicname": "Dune HD Kitchen",
+    "dynamicid": "dune_hd_kitchen",
+    "manufacturer": "Katana",
+    "version": 1,
+    "type": "TUNER",
+    "buttons": {
+      "CURSOR LEFT": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$IP/cgi-bin/do?cmd=ir_code&ir_code=E817BF00"
+      },
+      "CURSOR RIGHT": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$IP/cgi-bin/do?cmd=ir_code&ir_code=E718BF00"
+      },
+      "CURSOR UP": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$IP/cgi-bin/do?cmd=ir_code&ir_code=EA15BF00"
+      },
+      "CURSOR DOWN": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$IP/cgi-bin/do?cmd=ir_code&ir_code=E916BF00"
+      },
+      "CURSOR ENTER": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$IP/cgi-bin/do?cmd=ir_code&ir_code=EB14BF00"
+      },
+      "MENU": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$IP/cgi-bin/do?cmd=ir_code&ir_code=AE51BF00"
+      },
+      "BACK": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$IP/cgi-bin/do?cmd=ir_code&ir_code=FB04BF00"
+      },
+      "VOLUME UP": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$IP/cgi-bin/do?cmd=ir_code&ir_code=AD52BF00"
+      },
+      "VOLUME DOWN": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$IP/cgi-bin/do?cmd=ir_code&ir_code=AC53BF00"
+      },
+      "MUTE TOGGLE": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$IP/cgi-bin/do?cmd=ir_code&ir_code=B946BF00"
+      },
+      "POWER ON": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$IP/cgi-bin/do?cmd=ir_code&ir_code=A05FBF00"
+      },
+      "POWER OFF": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$IP/cgi-bin/do?cmd=ir_code&ir_code=A15EBF00"
+      },
+      "PLAY TOGGLE": {
+        "label": "",
+        "type": "http-get",
+        "command": "http://$IP/cgi-bin/do?cmd=ir_code&ir_code=A956BF00"
+      }
+    }
+  }
+}
