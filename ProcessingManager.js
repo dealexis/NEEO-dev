@@ -12,6 +12,9 @@ const {resolveCname} = require("dns");
 const net = require('net');
 const chalk = require('chalk');
 
+const {GC} = require('./connections')
+
+
 //STRATEGY FOR THE COMMAND TO BE USED (HTTPGET, post, websocket, ...) New processor to be added here. This strategy mix both transport and data format (json, soap, ...)
 class ProcessingManager {
     constructor() {
@@ -124,11 +127,11 @@ class httprestProcessor {
     process(params) {
         return new Promise(function (resolve, reject) {
             try {
-                if (typeof (params.command) == 'string') {
-                    console.log('MEGA PROCESS: ' + params.headers);
-                    params.command = JSON.parse(params.command);
-                    params.headers = JSON.parse(params.headers);
-                }
+                // if (typeof (params.command) == 'string') {
+                //     console.log('MEGA PROCESS: ' + params.headers);
+                //     params.command = JSON.parse(params.command);
+                //     params.headers = JSON.parse(params.headers);
+                // }
                 if (params.command.verb == 'post') {
                     got.post(params.command.call, {json: params.command.message, responseType: 'json'})
                         .then((response) => {
@@ -246,13 +249,11 @@ class httpgetProcessor {
                 method: 'GET',
             }
 
-            console.log('headers:' + params.headers)
-
             if (params.headers) {
+                console.log('headers:' + params.headers)
                 options.headers = params.headers
+                //console.log('headers options:' + options.headers)
             }
-
-            console.log('headers options:' + options.headers)
 
             http(options)
                 .then(function (result) {
@@ -327,6 +328,8 @@ exports.httpgetProcessor = httpgetProcessor;
 
 class webSocketProcessor {
     initiate(connection) {
+
+        console.log(chalk.white.bgBlue.bold('Websocket initiate'))
         return new Promise(function (resolve, reject) {
             try {
                 if (connection.connector != "" && connection.connector != undefined) {
@@ -562,6 +565,20 @@ class httppostProcessor {
 
     process(params) {
         return new Promise(function (resolve, reject) {
+
+            if (params.command.custom) {
+                const options = params.command.custom;
+                http(options)
+                    .then(function (result) {
+                        resolve(result.data);
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    });
+                return;
+            }
+
+
             if (typeof (params.command) == 'string') {
                 params.command = JSON.parse(params.command);
             }
@@ -769,6 +786,9 @@ exports.mqttProcessor = mqttProcessor;
 
 class tcpProcessor {
     initiate(connection) {
+
+        //if(!connection.descriptor.init) return;
+
         return new Promise(function (resolve, reject) {
             console.log(chalk.red('---initiate---tcpProcessor---'))
 
@@ -778,9 +798,6 @@ class tcpProcessor {
                 descriptor = JSON.parse(descriptor);
                 connection.descriptor = descriptor;
                 var onConnectFunc = connection.descriptor.onConnectFunc;
-
-                //console.log(chalk.red(onConnectFunc))
-                //onConnectFunc ? console.log(chalk.green('onconnect true')) : console.log(chalk.red('onconnect false'));
 
                 const client = new net.Socket();
                 const connect = new Promise((resolve, reject) => {
@@ -827,7 +844,7 @@ class tcpProcessor {
                 * may be this case is not necessary
                 * */
 
-                reject();
+                reject('Connection descriptor is not a JSON');
             }
 
         });
@@ -835,6 +852,15 @@ class tcpProcessor {
 
     process(params) {
         return new Promise((resolve, reject) => {
+
+            if (params._class) {
+
+                const device = eval(params._class)
+                device.write(params.command + '\r\n')
+
+                resolve();
+                return;
+            }
 
             console.log(chalk.white.bgBlue.bold(this.constructor.name))
             console.log(chalk.white.bgRed.bold(' PROCESS TCP PARAMS '))
@@ -848,43 +874,48 @@ class tcpProcessor {
                 return;
             }
 
-            switch (typeof params.command) {
-                case 'object':
+            if (params.command)
+                switch (typeof params.command) {
+                    case 'object':
 
-                    /*
-                    * Sending tcp commands should be step by step,
-                    * with micro latency
-                    * */
+                        /*
+                        * TCP commands should be sent step by step,
+                        * with micro latency
+                        * */
 
-                    var iteration = 0,
-                        cmd = params.command;
-                    for (var i = 0; i < cmd.length; i++) {
-                        setTimeout(function () {
-                            // console.log(chalk.green(iteration))
-                            // console.log(chalk.red(cmd[iteration]))
+                        var iteration = 0,
+                            cmd = params.command;
+                        for (var i = 0; i < cmd.length; i++) {
+                            setTimeout(function () {
+                                // console.log(chalk.green(iteration))
+                                // console.log(chalk.red(cmd[iteration]))
 
-                            params.connection.connector.write(cmd[iteration]);
+                                params.connection.connector.write(cmd[iteration]);
 
-                            iteration++;
-                        }, i * 50)
-                    }
-                    break;
-                case 'string':
+                                iteration++;
+                            }, i * 50)
+                        }
 
-                    console.log(chalk.bgYellow.red.bold('ALARM STRING'))
-                    /*
-                    * I think send hex to net package is not necessary
-                    * */
-                    /*if (params.command.match(/HEX:/)) {
-                        params.command = params.command.replace('HEX:', '');
+                        break;
+                    case 'string':
 
-                        console.log(chalk.red.bold(stringToHex(params.command)))
+                        //console.log(chalk.bgYellow.red.bold('ALARM STRING'))
+                        /*
+                        * I think send hex to net package is not necessary
+                        * */
+                        /*if (params.command.match(/HEX:/)) {
+                            params.command = params.command.replace('HEX:', '');
 
-                        params.connection.connector.write(params.command + "\r");
-                    } else {}*/
-                    params.connection.connector.write(params.command + "\r");
+                            console.log(chalk.red.bold(stringToHex(params.command)))
 
-                    break;
+                            params.connection.connector.write(params.command + "\r");
+                        } else {}*/
+                        params.connection.connector.write(params.command + "\r\n");
+
+                        break;
+                }
+            else if (params.packet) {
+
             }
 
             resolve();

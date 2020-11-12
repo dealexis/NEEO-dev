@@ -1,0 +1,63 @@
+{
+  "name": "SAMSUNG",
+  "manufacturer": "Katana Networks",
+  "type": "TV",
+  "version": 5,
+  "variables": {
+    "IP": "192.168.1.156"
+  },
+  "discover": {
+    "welcomeheadertext": "SAMSUNG",
+    "welcomedescription": "powered by MrsKisKis",
+    "command": {
+      "type": "http-get",
+      "command": "http://$NeeoBrainIP:3000/v1/projects/home/rooms/",
+      "queryresult": "$."
+    }
+  },
+  "template": {
+    "name": "SAMSUNG",
+    "dynamicname": "SAMSUNG",
+    "dynamicid": "samsung",
+    "manufacturer": "Katana",
+    "version": 1,
+    "type": "TV",
+    "buttons": {
+      "PAIR": {
+        "label": "PAIR",
+        "type": "http-post",
+        "command": {
+          "custom": {
+            "uri": "192.168.1.156:7677/MainTVServer2/control/MainTVAgent2",
+            "headers": {
+              "Accept": "*/*",
+              "CONTENT-TYPE": "text/xml; charset=\"utf-8\"",
+              "USER-AGENT": "NEEO Remote",
+              "X-MRCP-ID": "64:5D:86:61:DF:E6",
+              "SOAPACTION": "urn:samsung.com:service:MainTVAgent2:1#GetAPInformation",
+              "Expect": "100-continue"
+            },
+            "data": "<?xml version=\"1.0\" encoding=\"utf-8\"?><s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:GetAPInformation xmlns:u=\"urn:samsung.com:service:MainTVAgent2:1\"></u:GetAPInformation></s:Body></s:Envelope>"
+          }
+        }
+      },
+      "SETVOLUME": {
+        "label": "SET VOLUME 30",
+        "type": "http-post",
+        "command": {
+          "custom": {
+            "uri": "192.168.1.156:7677/MainTVServer2/control/MainTVAgent2",
+            "headers": {
+              "Accept": "*/*",
+              "CONTENT-TYPE": "text/xml; charset=\"utf-8\"",
+              "USER-AGENT": "NEEO Remote",
+              "X-MRCP-ID": "64:5D:86:61:DF:E6",
+              "SOAPACTION": "urn:samsung.com:service:MainTVAgent2:1#GetAPInformation",
+              "Expect": "100-continue"
+            }
+          }
+        }
+      }
+    }
+  }
+}

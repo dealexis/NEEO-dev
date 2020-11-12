@@ -327,9 +327,10 @@ module.exports = function controller(driver) {
     this.commandProcessor = function (command, commandtype, deviceId, headers) { // process any command according to the target protocole
 
         console.log(chalk.white.bgBlue.bold(' COMMAND PROCESSOR '))
-        console.log(chalk.green('HEADERS:') + headers)
-        console.log(chalk.green('COMMAND:') + command + typeof command)
-        console.log(chalk.green('COMMAND_TYPE:') + commandtype)
+        if (headers)
+            console.log(chalk.green('HEADERS: ') + headers)
+        console.log(chalk.green('COMMAND: ') + command + typeof command)
+        console.log(chalk.green('COMMAND_TYPE: ') + commandtype)
         // console.log(chalk.green('IP:') + ip)
         // console.log(chalk.green('PORT:') + port)
 
@@ -341,7 +342,7 @@ module.exports = function controller(driver) {
             console.log(chalk.white.bgBlue.bold(' getConnection '))
             //console.log(connection.command);
 
-            if(typeof command !== 'object'){
+            if (typeof command !== 'object') {
                 command = self.vault.readVariables(command, deviceId);
                 command = self.assignTo(RESULT, command, '');
             }
@@ -350,6 +351,8 @@ module.exports = function controller(driver) {
                 command,
                 connection,
             };
+
+            console.log(params);
 
             switch (commandtype) {
                 case 'http-get':
