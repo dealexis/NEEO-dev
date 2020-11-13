@@ -12,7 +12,7 @@ const {resolveCname} = require("dns");
 const net = require('net');
 const chalk = require('chalk');
 
-const {GC} = require('./connections')
+const {GC, CiscoJAD} = require('./connections')
 
 
 //STRATEGY FOR THE COMMAND TO BE USED (HTTPGET, post, websocket, ...) New processor to be added here. This strategy mix both transport and data format (json, soap, ...)
@@ -787,7 +787,9 @@ exports.mqttProcessor = mqttProcessor;
 class tcpProcessor {
     initiate(connection) {
 
-        //if(!connection.descriptor.init) return;
+        if (connection.descriptor.init) return new Promise(resolve => {
+            resolve();
+        });
 
         return new Promise(function (resolve, reject) {
             console.log(chalk.red('---initiate---tcpProcessor---'))
@@ -851,15 +853,49 @@ class tcpProcessor {
     }
 
     process(params) {
+
+        console.log(chalk.red('params.device'))
+        console.log(chalk.red(params.device))
+
         return new Promise((resolve, reject) => {
 
-            if (params._class) {
+            if (params.device) {
 
-                const device = eval(params._class)
-                device.write(params.command + '\r\n')
+                const device = eval(params.device)
+
+                console.log(device)
+
+                switch (typeof params.command) {
+                    case 'object':
+
+                        /*
+                        * TCP commands should be sent step by step,
+                        * with micro latency
+                        * */
+
+                        let iteration = 0,
+                            cmd = params.command;
+                        for (let i = 0; i < cmd.length; i++) {
+                            setTimeout(function () {
+                                // console.log(chalk.green(iteration))
+                                // console.log(chalk.red(cmd[iteration]))
+
+                                device.connection.write(cmd[iteration] + '\r\n');
+
+                                iteration++;
+                            }, i * 50)
+                        }
+
+                        break;
+                    case 'string':
+                        device.connection.write(params.command + '\r\n')
+                        break;
+                }
+
 
                 resolve();
                 return;
+
             }
 
             console.log(chalk.white.bgBlue.bold(this.constructor.name))
@@ -883,9 +919,9 @@ class tcpProcessor {
                         * with micro latency
                         * */
 
-                        var iteration = 0,
+                        let iteration = 0,
                             cmd = params.command;
-                        for (var i = 0; i < cmd.length; i++) {
+                        for (let i = 0; i < cmd.length; i++) {
                             setTimeout(function () {
                                 // console.log(chalk.green(iteration))
                                 // console.log(chalk.red(cmd[iteration]))
@@ -914,9 +950,6 @@ class tcpProcessor {
 
                         break;
                 }
-            else if (params.packet) {
-
-            }
 
             resolve();
 

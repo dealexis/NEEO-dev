@@ -324,7 +324,7 @@ module.exports = function controller(driver) {
         });
     };
 
-    this.commandProcessor = function (command, commandtype, deviceId, headers) { // process any command according to the target protocole
+    this.commandProcessor = function (command, commandtype, deviceId, headers, device) { // process any command according to the target protocole
 
         console.log(chalk.white.bgBlue.bold(' COMMAND PROCESSOR '))
         if (headers)
@@ -352,13 +352,16 @@ module.exports = function controller(driver) {
                 connection,
             };
 
-            console.log(params);
-
             switch (commandtype) {
                 case 'http-get':
                     if (headers) params.headers = headers;
                     break;
+                case 'tcp':
+                    if (device) params.device = device;
+                    break;
             }
+
+            console.log(params);
 
             processingManager.process(params)
                 .then((result) => {
@@ -405,7 +408,7 @@ module.exports = function controller(driver) {
     };
 
     this.queryProcessor = function (data, query, commandtype, deviceId) { // process any command according to the target protocole
-                                                                          //this.queryProcessor = function (data, query, commandtype, deviceId, headers) { // process any command according to the target protocole
+        //this.queryProcessor = function (data, query, commandtype, deviceId, headers) { // process any command according to the target protocole
 
         console.log(chalk.white.bgBlue(' QUERY PROCESSOR '));
 
@@ -481,14 +484,15 @@ module.exports = function controller(driver) {
         });
     };
 
-    this.actionManager = function (deviceId, commandtype, command, queryresult, evaldo, evalwrite, headers, ip, port) {
+    this.actionManager = function (deviceId, commandtype, command, queryresult, evaldo, evalwrite, headers, device) {
 
         console.log(chalk.white.bgBlue.bold(' METHOD: actionManager '))
+        console.log(chalk.white.bgBlue.bold(' device: ' + device + ' '))
 
         return new Promise(function (resolve, reject) {
             try {
                 console.log(command + ' - ' + commandtype);
-                self.commandProcessor(command, commandtype, deviceId, headers, ip, port)
+                self.commandProcessor(command, commandtype, deviceId, headers, device)
                     .then((result) => {
                         self.queryProcessor(result, queryresult, commandtype, deviceId).then((result) => {
                             //self.queryProcessor(result, queryresult, commandtype, deviceId, headers).then((result) => {
@@ -575,7 +579,9 @@ module.exports = function controller(driver) {
             theButton = theButton.value;
             if (theButton.type != WOL) { //all the cases
                 if (theButton.command != undefined) {
-                    self.actionManager(deviceId, theButton.type, theButton.command, theButton.queryresult, theButton.evaldo, theButton.evalwrite, theButton.headers, theButton.ip, theButton.port)
+                    console.log(chalk.white.bgBlue.bold(' the button device'))
+                    console.log(theButton.device)
+                    self.actionManager(deviceId, theButton.type, theButton.command, theButton.queryresult, theButton.evaldo, theButton.evalwrite, theButton.headers, theButton.device)
                         .then(() => {
                             console.log('============  ' + chalk.white.bgGreen.bold(' ACTION DONE ') + '  ============');
                         })
