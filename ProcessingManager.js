@@ -58,11 +58,11 @@ class ProcessingManager {
     process(params) {
         return new Promise((resolve, reject) => {
 
-            console.log('-------------------------')
-
-            console.log(chalk.white.bgBlue.bold(" CLASS: ProcessingManager "))
-            console.log("METHOD: process")
-            console.log(chalk.white.bgBlue.bold(' PARAMS '))
+            // console.log('-------------------------')
+            //
+            // console.log(chalk.white.bgBlue.bold(" CLASS: ProcessingManager "))
+            // console.log("METHOD: process")
+            // console.log(chalk.white.bgBlue.bold(' PARAMS '))
             /*for (var f in params) {
                 //console.log(chalk.green(f + ':') + params[f])
                 //console.log('VALUE:' + params[f])
@@ -75,7 +75,7 @@ class ProcessingManager {
                 // }
             }*/
 
-            console.log(chalk.black.bgBlue.bold(' THIS PROCESSOR: ') + this._processor.constructor.name);
+            console.log(chalk.black.bgRedBright.bold(' THIS PROCESSOR: ') + this._processor.constructor.name);
 
             this._processor.process(params)
                 .then((result) => {
@@ -798,8 +798,6 @@ class tcpProcessor {
 
             try {
                 descriptor = JSON.parse(descriptor);
-                connection.descriptor = descriptor;
-                var onConnectFunc = connection.descriptor.onConnectFunc;
 
                 const client = new net.Socket();
                 const connect = new Promise((resolve, reject) => {
@@ -811,32 +809,6 @@ class tcpProcessor {
                         resolve();
                     });
                 });
-
-                /*
-                * if you don't need to handshake you can skip this property in driver config file
-                * */
-                if (onConnectFunc) {
-                    connect.then(() => {
-
-                        /*
-                        * you can write your own handler to handshake with device when connection is init
-                        * */
-                        eval(onConnectFunc);
-
-                        connection.connector = client;
-                        resolve(connection);
-
-                    }).catch(() => {
-                        console.log('REJECTED')
-                    });
-                } else {
-                    connect.then(() => {
-                        connection.connector = client;
-                        resolve(connection);
-                    }).catch(() => {
-                        console.log('REJECTED')
-                    });
-                }
 
             } catch (e) {
                 console.log(chalk.red('Connection descriptor is not a JSON'))

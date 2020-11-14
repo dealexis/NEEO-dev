@@ -9,7 +9,14 @@
   "variables": {
     "ModNum": 1,
     "NumPort": 2,
-    "ID": 4
+    "ID": 4,
+    "result": "Здесь будет ответ О_о"
+  },
+  "labels": {
+    "Result": {
+      "label": "Результ (^▿^)",
+      "listen": "result"
+    }
   },
   "discover": {
     "welcomeheadertext": "Apple TV Kitchen",
