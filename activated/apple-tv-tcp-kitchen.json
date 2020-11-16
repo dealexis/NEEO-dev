@@ -2,21 +2,14 @@
   "name": "Apple TV TCP Kitchen",
   "manufacturer": "Katana Networks",
   "type": "VOD",
-  "version": 10,
+  "version": 4,
   "tcp": {
     "init": true
   },
   "variables": {
     "ModNum": 1,
     "NumPort": 2,
-    "ID": 4,
-    "result": "Здесь будет ответ О_о"
-  },
-  "labels": {
-    "Result": {
-      "label": "Результ (^▿^)",
-      "listen": "result"
-    }
+    "ID": 4
   },
   "discover": {
     "welcomeheadertext": "Apple TV Kitchen",
@@ -32,7 +25,7 @@
     "dynamicname": "Apple TV",
     "dynamicid": "apple_tv_kitchen",
     "manufacturer": "Katana",
-    "version": 1,
+    "version": 2,
     "type": "TV",
     "buttons": {
       "CURSOR LEFT": {

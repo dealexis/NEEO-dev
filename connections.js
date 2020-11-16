@@ -6,8 +6,13 @@ const delay = ms => {
     })
 }
 
-class GlobalCache {
+/*
+*   DeviceFather METHODS:
+*   send - it will retrieve response when request will be completed
+*   connection.write -
+* */
 
+class DeviceFather {
     constructor(ip, port) {
         this.init(ip, port)
     }
@@ -24,13 +29,10 @@ class GlobalCache {
             host: ip
         });
 
-        //let changes;
-        let exportGCtoData = this;
+        let thisObject = this;
         device.on('data', function (chunk) {
             console.log('device: ' + ip + '\n' + chalk.red(chunk));
-            //changes = chunk;
-            //console.log(this.constructor.name)
-            exportGCtoData.chunk = chunk;
+            thisObject.chunk = chunk;
         });
 
         device.on('end', function () {
@@ -38,26 +40,19 @@ class GlobalCache {
         });
 
         this.connection = device;
-
     }
 
-    getCredentials() {
-        console.log(this.ip)
-        console.log(this.port)
-    }
-
+    //await is needed to wait until chunk is fill
     async send(command) {
 
         let error = false;
-        await this.connection.write(command, function (e) {
+        await this.connection.write(command + '\r\n', function (e) {
             if (typeof e !== 'undefined') error = e;
         });
 
         await delay(250)
 
         if (error) throw new Error(error);
-
-        //console.log(error)
 
         console.log(chalk.green(this.chunk))
 
@@ -67,21 +62,18 @@ class GlobalCache {
 
 }
 
+class GlobalCache extends DeviceFather {
+    constructor(ip, port) {
+        super(ip, port);
+    }
+}
+
 const GC = new GlobalCache('192.168.1.180', 4998);
-
-let command = GC.send('sendir,1:2,4,38000,1,1,342,170,22,20,22,62,22,62,22,62,22,20,22,62,22,62,22,62,22,62,22,62,22,62,22,20,22,20,22,20,22,20,22,62,22,62,22,20,22,20,22,62,22,20,22,20,22,20,22,20,22,62,22,20,22,20,22,20,22,20,22,20,22,20,22,20,22,760\r\n')
-command.then((e) => {
-    console.log('after cmd completed:' + e)
-}).catch(error => {
-    console.log(error + ' catched')
-})
-
 exports.GC = GC
 
-
-class CiscoJAD {
+class CiscoJAD extends DeviceFather {
     constructor(ip, port) {
-        this.init(ip, port)
+        super(ip, port);
     }
 
     init(ip, port) {
@@ -116,12 +108,7 @@ class CiscoJAD {
 
     }
 
-    getCredentials() {
-        console.log(this.ip)
-        console.log(this.port)
-    }
 }
 
 const CiscoJADExport = new CiscoJAD('192.168.1.154', 23);
-
 exports.CiscoJAD = CiscoJADExport
