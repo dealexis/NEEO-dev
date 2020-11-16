@@ -797,7 +797,14 @@ class tcpProcessor {
             var descriptor = connection.descriptor;
 
             try {
+
+                console.log(chalk.red('=================='))
+                console.log(chalk.green(connection.descriptor))
+                console.log(chalk.red('=================='))
+
                 descriptor = JSON.parse(descriptor);
+
+                if (descriptor.init) return resolve();
 
                 const client = new net.Socket();
                 const connect = new Promise((resolve, reject) => {
@@ -826,16 +833,16 @@ class tcpProcessor {
 
     process(params) {
 
-        console.log(chalk.red('params.device'))
-        console.log(chalk.red(params.device))
+        if (params.device) {
+            console.log(chalk.red('params.device'))
+            console.log(chalk.red(params.device))
+        }
 
         return new Promise((resolve, reject) => {
 
             if (params.device) {
 
                 const device = eval(params.device)
-
-                console.log(device)
 
                 switch (typeof params.command) {
                     case 'object':
@@ -849,23 +856,24 @@ class tcpProcessor {
                             cmd = params.command;
                         for (let i = 0; i < cmd.length; i++) {
                             setTimeout(function () {
-                                // console.log(chalk.green(iteration))
-                                // console.log(chalk.red(cmd[iteration]))
-
                                 device.connection.write(cmd[iteration] + '\r\n');
-
                                 iteration++;
                             }, i * 50)
                         }
 
                         break;
                     case 'string':
-                        device.connection.write(params.command + '\r\n')
+                        device.send(params.command).then(response => {
+                            console.log(chalk.redBright(response))
+
+                            if (response)
+                                return resolve(response);
+
+                            return resolve();
+                        })
                         break;
                 }
 
-
-                resolve();
                 return;
 
             }
@@ -878,8 +886,7 @@ class tcpProcessor {
 
             if (!params.connection.connector) {
                 console.log(chalk.red('REJECTED: Connection is impossible. Check both IP and Port'))
-                reject();
-                return;
+                return reject();
             }
 
             if (params.command)
@@ -898,7 +905,7 @@ class tcpProcessor {
                                 // console.log(chalk.green(iteration))
                                 // console.log(chalk.red(cmd[iteration]))
 
-                                params.connection.connector.write(cmd[iteration]);
+                                params.connection.connector.write(cmd[iteration] + "\r\n");
 
                                 iteration++;
                             }, i * 50)
@@ -930,9 +937,11 @@ class tcpProcessor {
 
     query(params) {
         return new Promise(function (resolve, reject) {
-            console.log(chalk.white.bgBlue.bold(' QUERY PARAMS '))
+            console.log(chalk.white.bgRedBright.bold(' QUERY PARAMS '))
             console.log(params)
-            resolve();
+
+            if (params.data) resolve(params.data.toString())
+            reject();
         });
     }
 
