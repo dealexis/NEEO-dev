@@ -11,7 +11,7 @@ const got = require('got');
 const {resolveCname} = require("dns");
 const net = require('net');
 const chalk = require('chalk');
-
+//----->>>> here you must import devices that you created in connections.js
 const {GC, CiscoJAD} = require('./connections')
 
 
@@ -833,12 +833,52 @@ class tcpProcessor {
 
     process(params) {
 
-        if (params.device) {
-            console.log(chalk.red('params.device'))
-            console.log(chalk.red(params.device))
-        }
+        // if (params.device) {
+        //     console.log(chalk.red('params.device'))
+        //     console.log(chalk.red(params.device))
+        // }
+
+        console.log(chalk.redBright.bgBlackBright(' TCP PROCESSOR METHOD > PROCESS '))
+        //console.log(chalk.redBright.bgBlackBright(JSON.stringify(params)))
+
+        console.log(chalk.white.bgRed.bold(JSON.stringify(params)))
+
 
         return new Promise((resolve, reject) => {
+
+            if (params.command.custom) {
+
+                console.log('============ CLASS: ' + chalk.white.bgBlue(' tcpProcessor ') + '==============')
+
+                if (!params.command.custom.port && !params.command.custom.ip) reject('You must define IP and Port');
+
+                const client = new net.Socket();
+                client.connect({
+                    host: params.command.custom.ip,
+                    port: parseInt(params.command.custom.port),
+                }, function () {
+
+                    console.log(chalk.green.bold('SEND COMMAND:') + params.command);
+                    console.log(chalk.green.bold('IP') + params.command.custom.ip);
+                    console.log(chalk.green.bold('Port:') + params.command.custom.port);
+
+                    client.write(params.command.toSend);
+
+                    resolve();
+
+                });
+
+                client.on('data', function (chunk) {
+                    console.log(chalk.red('Data received: ' + chunk));
+                    client.end();
+                });
+
+                client.on('end', function () {
+                    console.log(chalk.red('END'));
+                });
+
+                return;
+            }
 
             if (params.device) {
 
@@ -863,7 +903,11 @@ class tcpProcessor {
 
                         break;
                     case 'string':
-                        device.send(params.command).then(response => {
+
+
+                        console.log(chalk.redBright(params.command))
+
+                        device.send(params.command + '\r\n').then(response => {
                             console.log(chalk.redBright(response))
 
                             if (response)
@@ -937,8 +981,8 @@ class tcpProcessor {
 
     query(params) {
         return new Promise(function (resolve, reject) {
-            console.log(chalk.white.bgRedBright.bold(' QUERY PARAMS '))
-            console.log(params)
+            // console.log(chalk.white.bgRedBright.bold(' QUERY PARAMS '))
+            // console.log(params)
 
             if (params.data) resolve(params.data.toString())
             reject();

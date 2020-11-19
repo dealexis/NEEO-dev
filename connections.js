@@ -60,6 +60,14 @@ class DeviceFather {
 
     }
 
+    getIP() {
+        return this.ip;
+    }
+
+    getPort() {
+        return this.port;
+    }
+
 }
 
 class GlobalCache extends DeviceFather {
@@ -108,7 +116,20 @@ class CiscoJAD extends DeviceFather {
 
     }
 
+    send() {
+    }
+
 }
 
 const CiscoJADExport = new CiscoJAD('192.168.1.154', 23);
-exports.CiscoJAD = CiscoJADExport
+exports.CiscoJAD = CiscoJADExport;
+
+
+class SamsungTV7677 extends DeviceFather {
+    constructor(ip, port) {
+        super(ip, port);
+    }
+}
+
+// const SamsungTV7677Export = new SamsungTV7677('192.168.1.156', 7677);
+// exports.SamsungTV7677 = SamsungTV7677Export;

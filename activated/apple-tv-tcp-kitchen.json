@@ -2,10 +2,7 @@
   "name": "Apple TV TCP Kitchen",
   "manufacturer": "Katana Networks",
   "type": "VOD",
-  "version": 4,
-  "tcp": {
-    "init": true
-  },
+  "version": 5,
   "variables": {
     "ModNum": 1,
     "NumPort": 2,

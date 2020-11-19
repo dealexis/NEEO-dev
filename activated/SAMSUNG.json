@@ -2,9 +2,10 @@
   "name": "SAMSUNG",
   "manufacturer": "Katana Networks",
   "type": "TV",
-  "version": 7,
+  "version": 4,
   "variables": {
     "IP": "192.168.1.156",
+    "Port": 7677,
     "ModNum": 1,
     "NumPort": 1,
     "ID": 4
@@ -25,8 +26,12 @@
     "manufacturer": "Katana",
     "version": 1,
     "type": "TV",
+    "variables": {
+      "isHandshaked": false,
+      "isOn": false
+    },
     "buttons": {
-      "PAIR": {
+      "PAIR_NO": {
         "label": "PAIR",
         "type": "http-post",
         "command": {
@@ -61,17 +66,69 @@
           }
         }
       },
-      "GC_POWER_ON": {
+      "POWER ON": {
+        "label": "",
+        "type": "static",
+        "command": "",
+        "evaldo": [
+          {
+            "test": "DYNAMIK (\"$isOn\" == \"true\") ? true : false",
+            "then": "",
+            "or": "__TURN ON"
+          },
+          {
+            "test": "DYNAMIK (\"$isOn\" == \"true\" && \"$isHandshaked\" == \"false\")",
+            "then": "__PAIR"
+          }
+        ]
+      },
+      "__TURN ON": {
         "label": "",
         "type": "tcp",
         "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,21,22,21,22,64,22,64,22,21,22,21,22,64,22,21,22,64,22,64,22,21,22,21,22,64,22,64,22,21,22,1820",
-        "device": "GC"
+        "device": "GC",
+        "evalwrite": [
+          {
+            "variable": "isOn",
+            "value": true
+          }
+        ],
+        "evaldo": [
+          {
+            "test": "DYNAMIK (String(\"$isHandshaked\") == \"true\") ? true : false",
+            "then": "",
+            "or": "__PAIR"
+          }
+        ]
       },
-      "GC_POWER_OFF": {
+      "POWER OFF": {
         "label": "",
         "type": "tcp",
         "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,173,173,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,21,21,65,21,65,21,65,21,65,21,21,21,21,21,65,21,65,21,21,21,1832",
+        "device": "GC",
+        "evalwrite": [
+          {
+            "variable": "isOn",
+            "value": false
+          }
+        ]
+      },
+      "CURSOR ENTER": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,64,22,21,22,64,22,64,22,21,22,64,22,64,22,64,22,21,22,64,22,21,22,21,22,64,22,1820",
         "device": "GC"
+      },
+      "__PAIR": {
+        "label": "",
+        "type": "tcp",
+        "command": {
+          "custom": {
+            "ip": "$IP",
+            "port": "$Port",
+            "toSend": "POST $IP:$Port/MainTVServer2/control/MainTVAgent2 HTTP/1.1\\r\\n +\n            'Accept: */*\\r\\n' +\n            'CONTENT-TYPE: text/xml; charset=\"utf-8\" \\r\\n' +\n            'USER-AGENT: NEEO Remote One\\r\\n' +\n            'X-MRCP-ID: 64:5D:86:61:DF:E7\\r\\n' +\n            'SOAPACTION: \"urn:samsung.com:service:MainTVAgent2:1#GetAPInformation\"\\r\\n' +\n            'Expect: 100-continue\\r\\n' +\n            'Content-Length: 282\\r\\n' +\n            `Host: $IP:$Port\\r\\n` +\n            '\\r\\n' +\n            '<?xml version=\"1.0\" encoding=\"utf-8\"?><s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:GetAPInformation xmlns:u=\"urn:samsung.com:service:MainTVAgent2:1\"></u:GetAPInformation></s:Body></s:Envelope>\\r\\n"
+          }
+        }
       }
     }
   }

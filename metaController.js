@@ -204,7 +204,7 @@ module.exports = function controller(driver) {
             return inputChain;
         } catch (err) {
             console.log('META found an error in the DYNAMIK Function created with (' + Pattern + ', ' + inputChain + ', ' + givenResult + '). Error: ');
-            console.log(err);
+            console.log('ERROR:' + err);
         }
     };
 
@@ -266,7 +266,7 @@ module.exports = function controller(driver) {
 
     this.assignProcessor = function (commandtype) {
 
-        console.log(chalk.white.bgBlue.bold(' assignProcessor COMMAND TYPE ') + ' ' + commandtype);
+        //console.log(chalk.white.bgBlue.bold(' assignProcessor COMMAND TYPE ') + ' ' + commandtype);
 
         if (commandtype == HTTPGET) {
             processingManager.processor = myHttpgetProcessor;
@@ -326,11 +326,11 @@ module.exports = function controller(driver) {
 
     this.commandProcessor = function (command, commandtype, deviceId, headers, device) { // process any command according to the target protocole
 
-        console.log(chalk.white.bgBlue.bold(' COMMAND PROCESSOR '))
-        if (headers)
-            console.log(chalk.green('HEADERS: ') + headers)
-        console.log(chalk.green('COMMAND: ') + command + typeof command)
-        console.log(chalk.green('COMMAND_TYPE: ') + commandtype)
+        //console.log(chalk.white.bgBlue.bold(' COMMAND PROCESSOR '))
+        // if (headers)
+        //     console.log(chalk.green('HEADERS: ') + headers)
+        // console.log(chalk.green('COMMAND: ') + command + typeof command)
+        // console.log(chalk.green('COMMAND_TYPE: ') + commandtype)
         // console.log(chalk.green('IP:') + ip)
         // console.log(chalk.green('PORT:') + port)
 
@@ -339,7 +339,7 @@ module.exports = function controller(driver) {
             self.assignProcessor(commandtype);
             const connection = self.getConnection(commandtype);
 
-            console.log(chalk.white.bgBlue.bold(' getConnection '))
+            //console.log(chalk.white.bgBlue.bold(' getConnection '))
             //console.log(connection.command);
 
             if (typeof command !== 'object') {
@@ -361,7 +361,7 @@ module.exports = function controller(driver) {
                     break;
             }
 
-            console.log(params);
+            //console.log(params);
 
             processingManager.process(params)
                 .then((result) => {
@@ -491,7 +491,7 @@ module.exports = function controller(driver) {
 
         return new Promise(function (resolve, reject) {
             try {
-                console.log(command + ' - ' + commandtype);
+                //console.log(command + ' - ' + commandtype);
                 self.commandProcessor(command, commandtype, deviceId, headers, device)
                     .then((result) => {
                         self.queryProcessor(result, queryresult, commandtype, deviceId).then((result) => {

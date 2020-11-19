@@ -1,11 +1,8 @@
 {
   "name": "Cisco JAD",
   "manufacturer": "Katana",
-  "version": 10,
+  "version": 11,
   "type": "HDMISWITCH",
-  "tcp": {
-    "init": true
-  },
   "variables": {
     "IP": "192.168.1.154",
     "Port": 23
