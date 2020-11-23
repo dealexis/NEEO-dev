@@ -154,7 +154,7 @@ class Samsung extends DeviceFather {
 
         let thisObject = this;
         device.on('data', function (chunk) {
-            console.log('device: ' + ip + '\n' + chalk.red(chunk));
+            //console.log('device: ' + ip + '\n' + chalk.red(chunk));
             thisObject.chunk = chunk;
         });
 
@@ -172,6 +172,8 @@ class Samsung extends DeviceFather {
     async send(command) {
 
         this.init() //init new connection
+
+        console.log(chalk.whiteBright(command))
 
         let error = false;
         await this.connection.write(command, function (e) {

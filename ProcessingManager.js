@@ -195,6 +195,7 @@ class httprestProcessor {
             let previousResult = '';
             clearInterval(params.listener.timer);
             params.listener.timer = setInterval(() => {
+
                 http(params.command)
                     .then(function (result) {
                         if (result != previousResult) {
@@ -300,6 +301,8 @@ class httpgetProcessor {
             console.log(params);
             clearInterval(params.listener.timer);
             params.listener.timer = setInterval(() => {
+                console.log(chalk.black.bgRed.bold(' LISTENER '))
+                console.log(params.command)
                 http(params.command)
                     .then(function (result) {
                         if (result.data != previousResult) {
@@ -836,7 +839,7 @@ class tcpProcessor {
 
         console.log(chalk.redBright.bgBlackBright(' TCP PROCESSOR METHOD > PROCESS '))
         //console.log(chalk.redBright.bgBlackBright(JSON.stringify(params)))
-        console.log(chalk.white.bgRed.bold(JSON.stringify(params)))
+        //console.log(chalk.white.bgRed.bold(JSON.stringify(params)))
 
         return new Promise((resolve, reject) => {
 
@@ -844,6 +847,9 @@ class tcpProcessor {
                 _case,
                 details = [],
                 packet = '';
+
+            //debug
+            //if (params.command.send.packet) console.log(params.command.send.packet)
 
             if (params.command.useMethod) _case = 'use_method';
             if (params.command.send) _case = 'send';

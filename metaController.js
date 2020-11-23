@@ -194,6 +194,8 @@ module.exports = function controller(driver) {
                         inputChain = inputChain.replace(Pattern, givenResult);
                     }
                     let evaluatedValue = eval(inputChain.split('DYNAMIK ')[1]);
+
+                    //console.log(chalk.redBright(inputChain))
                     console.log("evaluated: " + evaluatedValue)
                     return evaluatedValue;
                 } else {
@@ -325,26 +327,18 @@ module.exports = function controller(driver) {
     };
 
     this.commandProcessor = function (command, commandtype, deviceId, headers, device) { // process any command according to the target protocole
-
-        //console.log(chalk.white.bgBlue.bold(' COMMAND PROCESSOR '))
-        // if (headers)
-        //     console.log(chalk.green('HEADERS: ') + headers)
-        // console.log(chalk.green('COMMAND: ') + command + typeof command)
-        // console.log(chalk.green('COMMAND_TYPE: ') + commandtype)
-        // console.log(chalk.green('IP:') + ip)
-        // console.log(chalk.green('PORT:') + port)
-
         return new Promise(function (resolve, reject) {
 
             self.assignProcessor(commandtype);
             const connection = self.getConnection(commandtype);
 
-            //console.log(chalk.white.bgBlue.bold(' getConnection '))
-            //console.log(connection.command);
-
             if (typeof command !== 'object') {
                 command = self.vault.readVariables(command, deviceId);
                 command = self.assignTo(RESULT, command, '');
+            } else {
+                command = self.vault.readVariables(command, deviceId);
+                //console.log(chalk.greenBright(command))
+                //command = self.assignTo(RESULT, command, '');
             }
 
             const params = {
@@ -491,7 +485,7 @@ module.exports = function controller(driver) {
 
         return new Promise(function (resolve, reject) {
             try {
-                //console.log(command + ' - ' + commandtype);
+                // console.log(JSON.stringify(command) + ' - ' + commandtype);
                 self.commandProcessor(command, commandtype, deviceId, headers, device)
                     .then((result) => {
                         self.queryProcessor(result, queryresult, commandtype, deviceId).then((result) => {

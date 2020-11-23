@@ -2,7 +2,7 @@
   "name": "SAMSUNG",
   "manufacturer": "Katana Networks",
   "type": "TV",
-  "version": 15,
+  "version": 8,
   "variables": {
     "IP": "192.168.1.157",
     "Port": 9197,
@@ -24,54 +24,21 @@
     "dynamicname": "SAMSUNG",
     "dynamicid": "samsung",
     "manufacturer": "Katana",
-    "version": 1,
+    "version": 4,
     "type": "TV",
     "variables": {
-      "isHandshaked": false,
       "isOn": false,
-      "Volume": ""
-    },
-    "listeners": {
-      "VolumeStatus": {
-        "type": "tcp",
-        "command": {
-          "send": {
-            "packet": [
-              "POST /upnp/control/RenderingControl1 HTTP/1.1\r\n",
-              "HOST: $IP:$Port\r\n",
-              "Accept: */*\r\n",
-              "CONTENT-LENGTH: 328\r\n",
-              "CONTENT-TYPE: text/xml; charset=\"utf-8\"\r\n",
-              "USER-AGENT: NEEO REMOTE One\r\n",
-              "X-MRCP-ID: 70:B3:D5:22:64:05\r\n",
-              "SOAPACTION: \"urn:schemas-upnp-org:service:RenderingControl:1#GetVolume\"\r\n",
-              "Expect: 100-continue\r\n",
-              "\r\n",
-              "<?xml version=\"1.0\" encoding=\"utf-8\"?><s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:GetVolume xmlns:u=\"urn:schemas-upnp-org:service:RenderingControl:1\"><InstanceID>0</InstanceID><Channel>Master</Channel></u:GetVolume></s:Body></s:Envelope>\r\n"
-            ],
-            "device": "SamsungTV"
-          }
-        },
-        "pooltime": "1000",
-        "poolduration": "1000",
-        "queryresult": "$.",
-        "evalwrite": [
-          {
-            "variable": "Volume",
-            "value": "DYNAMIK \"$Result\".match(/<CurrentVolume>[0-9]*/)[0].replace('<CurrentVolume>', '')"
-          }
-        ]
-      }
+      "Volume": 10
     },
     "sliders": {
       "VOLUME": {
-        "label": "Volume",
+        "label": "",
         "unit": "",
         "listen": "Volume",
         "evaldo": [
           {
             "test": true,
-            "then": "",
+            "then": "__SETVOLUME",
             "or": ""
           }
         ]
@@ -128,15 +95,39 @@
       },
       "VOLUME UP": {
         "label": "",
-        "type": "tcp",
-        "command": "sendir,$ModNum:1,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,64,22,64,22,1820",
-        "device": "GC"
+        "type": "static",
+        "command": "",
+        "evalwrite": [
+          {
+            "variable": "Volume",
+            "value": "DYNAMIK (Number($Volume)<99)?Number($Volume)+1:100"
+          }
+        ],
+        "evaldo": [
+          {
+            "test": true,
+            "then": "__SETVOLUME",
+            "or": ""
+          }
+        ]
       },
       "VOLUME DOWN": {
         "label": "",
-        "type": "tcp",
-        "command": "sendir,$ModNum:1,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,21,22,64,22,21,22,21,22,21,22,21,22,21,22,21,22,64,22,21,22,64,22,64,22,64,22,64,22,1820",
-        "device": "GC"
+        "type": "static",
+        "command": "",
+        "evalwrite": [
+          {
+            "variable": "Volume",
+            "value": "DYNAMIK (Number($Volume)>1)?Number($Volume)-1:0"
+          }
+        ],
+        "evaldo": [
+          {
+            "test": true,
+            "then": "__SETVOLUME",
+            "or": ""
+          }
+        ]
       },
       "MUTE TOGGLE": {
         "label": "",
@@ -144,7 +135,7 @@
         "command": "sendir,$ModNum:1,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,64,22,1820",
         "device": "GC"
       },
-      "SETVOLUME": {
+      "__SETVOLUME": {
         "label": "",
         "type": "tcp",
         "command": {
@@ -160,16 +151,38 @@
               "SOAPACTION: \"urn:schemas-upnp-org:service:RenderingControl:1#SetVolume\"\r\n",
               "Expect: 100-continue\r\n",
               "\r\n",
-              "<?xml version=\"1.0\" encoding=\"utf-8\"?><s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:SetVolume xmlns:u=\"urn:schemas-upnp-org:service:RenderingControl:1\"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>15</DesiredVolume></u:SetVolume></s:Body></s:Envelope>\r\n"
+              "<?xml version=\"1.0\" encoding=\"utf-8\"?><s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:SetVolume xmlns:u=\"urn:schemas-upnp-org:service:RenderingControl:1\"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>$Volume</DesiredVolume></u:SetVolume></s:Body></s:Envelope>\r\n"
+            ],
+            "device": "SamsungTV"
+          }
+        }
+      },
+      "__GETVOLUME": {
+        "label": "",
+        "type": "tcp",
+        "command": {
+          "send": {
+            "packet": [
+              "POST /upnp/control/RenderingControl1 HTTP/1.1\r\n",
+              "HOST: $IP:$Port\r\n",
+              "Accept: */*\r\n",
+              "CONTENT-LENGTH: 328\r\n",
+              "CONTENT-TYPE: text/xml; charset=\"utf-8\"\r\n",
+              "USER-AGENT: NEEO REMOTE One\r\n",
+              "X-MRCP-ID: 70:B3:D5:22:64:05\r\n",
+              "SOAPACTION: \"urn:schemas-upnp-org:service:RenderingControl:1#GetVolume\"\r\n",
+              "Expect: 100-continue\r\n",
+              "\r\n",
+              "<?xml version=\"1.0\" encoding=\"utf-8\"?><s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:GetVolume xmlns:u=\"urn:schemas-upnp-org:service:RenderingControl:1\"><InstanceID>0</InstanceID><Channel>Master</Channel></u:GetVolume></s:Body></s:Envelope>\r\n"
             ],
             "device": "SamsungTV"
           }
         },
-        "evaldo": [
+        "queryresult": "$.",
+        "evalwrite": [
           {
-            "test": "DYNAMIK (\"$Result\".toString().match(/Action Failed/) !== null) ? true : false; console.log('heloo heloo')",
-            "then": "",
-            "or": "__PAIR"
+            "variable": "Volume",
+            "value": "DYNAMIK \"$Result\".match(/<CurrentVolume>[0-9]*/)[0].replace('<CurrentVolume>', '')"
           }
         ]
       },
