@@ -1,4 +1,5 @@
 const Net = require('net');
+const io = require('socket.io-client')
 const chalk = require('chalk');
 const delay = ms => {
     return new Promise(r => {
@@ -6,10 +7,12 @@ const delay = ms => {
     })
 }
 
+exports.delay = delay;
+
 /*
 *   DeviceFather METHODS:
 *   send - it will retrieve response when request will be completed
-*   connection.write -
+*   connection.write - it will send text to device and response will be on event data, you can use this when response is not necessary
 * */
 
 class DeviceFather {
@@ -39,6 +42,10 @@ class DeviceFather {
             console.log('device: ' + ip + ' END');
         });
 
+        device.on('error', function (error) {
+            console.log('device: ' + ip + '\n' + chalk.red(error))
+        })
+
         this.connection = device;
     }
 
@@ -56,7 +63,7 @@ class DeviceFather {
 
         console.log(chalk.green(this.chunk))
 
-        return this.chunk;
+        return this.chunk.toString();
 
     }
 
@@ -125,11 +132,73 @@ const CiscoJADExport = new CiscoJAD('192.168.1.154', 23);
 exports.CiscoJAD = CiscoJADExport;
 
 
-class SamsungTV7677 extends DeviceFather {
-    constructor(ip, port) {
-        super(ip, port);
+class Samsung extends DeviceFather {
+
+    init() {
+
+        console.log(chalk.redBright('SAMSUNG INIT'))
+
+        let ip = '192.168.1.157',
+            port = 9197;
+
+        console.log('init:' + this.constructor.name);
+        this.ip = ip;
+        this.port = port;
+        this.chunk = 'default';
+        const device = new Net.Socket();
+
+        device.connect({
+            port,
+            host: ip
+        });
+
+        let thisObject = this;
+        device.on('data', function (chunk) {
+            console.log('device: ' + ip + '\n' + chalk.red(chunk));
+            thisObject.chunk = chunk;
+        });
+
+        device.on('end', function () {
+            console.log('device: ' + ip + ' END');
+        });
+
+        device.on('error', function (error) {
+            console.log('device: ' + ip + '\n' + chalk.red(error))
+        })
+
+        this.connection = device;
     }
+
+    async send(command) {
+
+        this.init() //init new connection
+
+        let error = false;
+        await this.connection.write(command, function (e) {
+            if (typeof e !== 'undefined') error = e;
+        });
+
+        await delay(250)
+
+        if (error) throw new Error(error);
+
+        //console.log(chalk.black.bgGreen(this.chunk))
+
+        return this.chunk.toString();
+
+    }
+
+    async pair() {
+        try {
+            await io(`ws://${this.getIP()}:8001/api/v2/channels/samsung.remote.control?name=TkVFTyBSZW1vdGU=`)
+        } catch (e) {
+            console.log(chalk.black.bgRed(e))
+            return false;
+        }
+        return true;
+    }
+
 }
 
 // const SamsungTV7677Export = new SamsungTV7677('192.168.1.156', 7677);
-// exports.SamsungTV7677 = SamsungTV7677Export;
+exports.SamsungTV = new Samsung();

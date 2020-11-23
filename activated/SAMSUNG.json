@@ -2,10 +2,10 @@
   "name": "SAMSUNG",
   "manufacturer": "Katana Networks",
   "type": "TV",
-  "version": 4,
+  "version": 15,
   "variables": {
-    "IP": "192.168.1.156",
-    "Port": 7677,
+    "IP": "192.168.1.157",
+    "Port": 9197,
     "ModNum": 1,
     "NumPort": 1,
     "ID": 4
@@ -28,25 +28,150 @@
     "type": "TV",
     "variables": {
       "isHandshaked": false,
-      "isOn": false
+      "isOn": false,
+      "Volume": ""
+    },
+    "listeners": {
+      "VolumeStatus": {
+        "type": "tcp",
+        "command": {
+          "send": {
+            "packet": [
+              "POST /upnp/control/RenderingControl1 HTTP/1.1\r\n",
+              "HOST: $IP:$Port\r\n",
+              "Accept: */*\r\n",
+              "CONTENT-LENGTH: 328\r\n",
+              "CONTENT-TYPE: text/xml; charset=\"utf-8\"\r\n",
+              "USER-AGENT: NEEO REMOTE One\r\n",
+              "X-MRCP-ID: 70:B3:D5:22:64:05\r\n",
+              "SOAPACTION: \"urn:schemas-upnp-org:service:RenderingControl:1#GetVolume\"\r\n",
+              "Expect: 100-continue\r\n",
+              "\r\n",
+              "<?xml version=\"1.0\" encoding=\"utf-8\"?><s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:GetVolume xmlns:u=\"urn:schemas-upnp-org:service:RenderingControl:1\"><InstanceID>0</InstanceID><Channel>Master</Channel></u:GetVolume></s:Body></s:Envelope>\r\n"
+            ],
+            "device": "SamsungTV"
+          }
+        },
+        "pooltime": "1000",
+        "poolduration": "1000",
+        "queryresult": "$.",
+        "evalwrite": [
+          {
+            "variable": "Volume",
+            "value": "DYNAMIK \"$Result\".match(/<CurrentVolume>[0-9]*/)[0].replace('<CurrentVolume>', '')"
+          }
+        ]
+      }
+    },
+    "sliders": {
+      "VOLUME": {
+        "label": "Volume",
+        "unit": "",
+        "listen": "Volume",
+        "evaldo": [
+          {
+            "test": true,
+            "then": "",
+            "or": ""
+          }
+        ]
+      }
     },
     "buttons": {
+      "CURSOR LEFT": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,21,22,64,22,21,22,21,22,64,22,64,22,21,22,21,22,64,22,21,22,64,22,64,22,21,22,21,22,64,22,1820",
+        "device": "GC"
+      },
+      "CURSOR RIGHT": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,21,22,64,22,21,22,21,22,21,22,64,22,64,22,21,22,64,22,21,22,64,22,64,22,64,22,21,22,21,22,64,22,1820",
+        "device": "GC"
+      },
+      "CURSOR UP": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,21,22,64,22,64,22,64,22,64,22,64,22,21,22,21,22,64,22,1820",
+        "device": "GC"
+      },
+      "CURSOR DOWN": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,21,22,21,22,21,22,21,22,64,22,64,22,21,22,21,22,64,22,64,22,64,22,64,22,21,22,21,22,64,22,1820",
+        "device": "GC"
+      },
+      "MENU": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,173,173,22,65,22,65,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,65,22,65,22,22,22,22,22,22,22,22,22,22,22,65,22,22,22,22,22,65,22,65,22,65,22,65,22,22,22,22,22,65,22,65,22,22,22,22,22,22,22,22,22,65,22,1787",
+        "device": "GC"
+      },
+      "BACK": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,21,22,64,22,64,22,21,22,64,22,21,22,21,22,21,22,64,22,21,22,21,22,64,22,21,22,64,22,64,22,1820",
+        "device": "GC"
+      },
+      "CHANNEL DOWN": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,64,22,21,22,21,22,21,22,64,22,64,22,64,22,64,22,21,22,64,22,64,22,64,22,1820",
+        "device": "GC"
+      },
+      "CHANNEL UP": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,21,22,64,22,21,22,21,22,64,22,21,22,21,22,21,22,64,22,21,22,64,22,64,22,21,22,64,22,64,22,64,22,1820",
+        "device": "GC"
+      },
+      "VOLUME UP": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:1,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,64,22,64,22,1820",
+        "device": "GC"
+      },
+      "VOLUME DOWN": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:1,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,21,22,64,22,21,22,21,22,21,22,21,22,21,22,21,22,64,22,21,22,64,22,64,22,64,22,64,22,1820",
+        "device": "GC"
+      },
+      "MUTE TOGGLE": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:1,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,64,22,1820",
+        "device": "GC"
+      },
       "SETVOLUME": {
-        "label": "SET VOLUME 30",
-        "type": "http-post",
+        "label": "",
+        "type": "tcp",
         "command": {
-          "custom": {
-            "uri": "192.168.1.156:7677/MainTVServer2/control/MainTVAgent2",
-            "headers": {
-              "Accept": "*/*",
-              "CONTENT-TYPE": "text/xml; charset=\"utf-8\"",
-              "USER-AGENT": "NEEO Remote",
-              "X-MRCP-ID": "64:5D:86:61:DF:E6",
-              "SOAPACTION": "urn:samsung.com:service:MainTVAgent2:1#GetAPInformation",
-              "Expect": "100-continue"
-            }
+          "send": {
+            "packet": [
+              "POST /upnp/control/RenderingControl1 HTTP/1.1\r\n",
+              "HOST: $IP:$Port\r\n",
+              "Accept: */*\r\n",
+              "CONTENT-LENGTH: 361\r\n",
+              "CONTENT-TYPE: text/xml; charset=\"utf-8\"\r\n",
+              "USER-AGENT: NEEO REMOTE One\r\n",
+              "X-MRCP-ID: 70:B3:D5:22:64:05\r\n",
+              "SOAPACTION: \"urn:schemas-upnp-org:service:RenderingControl:1#SetVolume\"\r\n",
+              "Expect: 100-continue\r\n",
+              "\r\n",
+              "<?xml version=\"1.0\" encoding=\"utf-8\"?><s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:SetVolume xmlns:u=\"urn:schemas-upnp-org:service:RenderingControl:1\"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>15</DesiredVolume></u:SetVolume></s:Body></s:Envelope>\r\n"
+            ],
+            "device": "SamsungTV"
           }
-        }
+        },
+        "evaldo": [
+          {
+            "test": "DYNAMIK (\"$Result\".toString().match(/Action Failed/) !== null) ? true : false; console.log('heloo heloo')",
+            "then": "",
+            "or": "__PAIR"
+          }
+        ]
       },
       "POWER ON": {
         "label": "",
@@ -57,10 +182,6 @@
             "test": "DYNAMIK (\"$isOn\" == \"true\") ? true : false",
             "then": "",
             "or": "__TURN ON"
-          },
-          {
-            "test": "DYNAMIK (\"$isOn\" == \"true\" && \"$isHandshaked\" == \"false\")",
-            "then": "__PAIR"
           }
         ]
       },
@@ -73,13 +194,6 @@
           {
             "variable": "isOn",
             "value": true
-          }
-        ],
-        "evaldo": [
-          {
-            "test": "DYNAMIK (String(\"$isHandshaked\") == \"true\") ? true : false",
-            "then": "",
-            "or": "__PAIR"
           }
         ]
       },
@@ -105,10 +219,9 @@
         "label": "",
         "type": "tcp",
         "command": {
-          "custom": {
-            "ip": "$IP",
-            "port": "$Port",
-            "toSend": "POST $IP:$Port/MainTVServer2/control/MainTVAgent2 HTTP/1.1\\r\\n +\n            'Accept: */*\\r\\n' +\n            'CONTENT-TYPE: text/xml; charset=\"utf-8\" \\r\\n' +\n            'USER-AGENT: NEEO Remote One\\r\\n' +\n            'X-MRCP-ID: 64:5D:86:61:DF:E7\\r\\n' +\n            'SOAPACTION: \"urn:samsung.com:service:MainTVAgent2:1#GetAPInformation\"\\r\\n' +\n            'Expect: 100-continue\\r\\n' +\n            'Content-Length: 282\\r\\n' +\n            `Host: $IP:$Port\\r\\n` +\n            '\\r\\n' +\n            '<?xml version=\"1.0\" encoding=\"utf-8\"?><s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:GetAPInformation xmlns:u=\"urn:samsung.com:service:MainTVAgent2:1\"></u:GetAPInformation></s:Body></s:Envelope>\\r\\n"
+          "useMethod": {
+            "method": "pair",
+            "device": "SamsungTV"
           }
         }
       }

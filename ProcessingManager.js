@@ -12,7 +12,8 @@ const {resolveCname} = require("dns");
 const net = require('net');
 const chalk = require('chalk');
 //----->>>> here you must import devices that you created in connections.js
-const {GC, CiscoJAD} = require('./connections')
+//const {GC, CiscoJAD, SamsungTV} = require('./connections')
+const devices = require('./connections')
 
 
 //STRATEGY FOR THE COMMAND TO BE USED (HTTPGET, post, websocket, ...) New processor to be added here. This strategy mix both transport and data format (json, soap, ...)
@@ -833,100 +834,151 @@ class tcpProcessor {
 
     process(params) {
 
-        // if (params.device) {
-        //     console.log(chalk.red('params.device'))
-        //     console.log(chalk.red(params.device))
-        // }
-
         console.log(chalk.redBright.bgBlackBright(' TCP PROCESSOR METHOD > PROCESS '))
         //console.log(chalk.redBright.bgBlackBright(JSON.stringify(params)))
-
         console.log(chalk.white.bgRed.bold(JSON.stringify(params)))
-
 
         return new Promise((resolve, reject) => {
 
-            if (params.command.custom) {
+            let _device,
+                _case,
+                details = [],
+                packet = '';
 
-                console.log('============ CLASS: ' + chalk.white.bgBlue(' tcpProcessor ') + '==============')
+            if (params.command.useMethod) _case = 'use_method';
+            if (params.command.send) _case = 'send';
+            if (params.command.custom) _case = 'custom';
+            if (params.device) _case = 'device';
 
-                if (!params.command.custom.port && !params.command.custom.ip) reject('You must define IP and Port');
+            switch (true) {
+                case _case === 'use_method':
+                    //case params.command.useMethod:
 
-                const client = new net.Socket();
-                client.connect({
-                    host: params.command.custom.ip,
-                    port: parseInt(params.command.custom.port),
-                }, function () {
+                    console.log(chalk.redBright('!!!METHOD USED!!!'))
 
-                    console.log(chalk.green.bold('SEND COMMAND:') + params.command);
-                    console.log(chalk.green.bold('IP') + params.command.custom.ip);
-                    console.log(chalk.green.bold('Port:') + params.command.custom.port);
+                    let params_custom = params.command.useMethod,
+                        method = params_custom.method;
 
-                    client.write(params.command.toSend);
+                    _device = eval(devices[params_custom.device]);
 
-                    resolve();
+                    let call_method = _device[method](); //calling device method
 
-                });
+                    resolve(call_method);
+                    return;
 
-                client.on('data', function (chunk) {
-                    console.log(chalk.red('Data received: ' + chunk));
-                    client.end();
-                });
+                    break;
+                case _case === 'send':
+                    //case params.command.send:
 
-                client.on('end', function () {
-                    console.log(chalk.red('END'));
-                });
+                    details = params.command.send;
+                    packet = details.packet;
+                    _device = eval(devices[details.device]);
 
-                return;
+                    if (typeof packet === 'object') packet = packet.join('');
+
+                    let cmd = _device.send(packet);
+
+                    cmd.then(response => {
+                        console.log(chalk.redBright('PACKET RESPONSE'))
+                        console.log(chalk.redBright(response))
+                        resolve(response);
+                    }).catch(error => {
+                        reject(error);
+                    })
+
+                    return;
+
+                    break;
+                case _case === 'custom': //sending commands like http
+                    //case params.command.custom:
+
+                    if (!params.command.custom.port && !params.command.custom.ip) {
+                        reject('You must define IP and Port');
+                        return;
+                    }
+
+                    const client = new net.Socket();
+                    client.connect({
+                        host: params.command.custom.ip,
+                        port: parseInt(params.command.custom.port),
+                    }, function () {
+
+                        console.log(chalk.green.bold('SEND COMMAND:') + params.command);
+                        console.log(chalk.green.bold('IP') + params.command.custom.ip);
+                        console.log(chalk.green.bold('Port:') + params.command.custom.port);
+
+                        client.write(params.command.toSend);
+
+                        resolve();
+
+                    });
+
+                    client.on('data', function (chunk) {
+                        console.log(chalk.red('Data received: ' + chunk));
+                        client.end();
+                    });
+
+                    client.on('end', function () {
+                        console.log(chalk.red('END'));
+                    });
+
+                    client.on('error', function () {
+                        console.log(chalk.red('!!!ERROR!!!'));
+                        reject('!!!Error occured in TCP Processor!!!')
+                    });
+
+
+                    return;
+
+                    break;
+                case _case === 'device':
+                    //case params.device:
+
+                    console.log(chalk.redBright('device'))
+
+                    _device = eval(devices[params.device])
+                    switch (typeof params.command) {
+                        case 'object':
+
+                            /*
+                            * TCP commands should be sent step by step,
+                            * with micro latency
+                            * */
+
+                            let iteration = 0,
+                                cmd = params.command;
+                            for (let i = 0; i < cmd.length; i++) {
+                                setTimeout(function () {
+                                    _device.connection.write(cmd[iteration] + '\r\n');
+                                    iteration++;
+                                }, i * 50)
+                            }
+
+                            break;
+                        case 'string':
+
+                            console.log(chalk.redBright(params.command))
+
+                            _device.send(params.command + '\r\n').then(response => {
+                                console.log(chalk.redBright(response))
+
+                                if (response)
+                                    return resolve(response);
+
+                                return resolve();
+                            }).catch(error => {
+                                console.log(chalk.red(error))
+                                reject(error);
+                            })
+                            break;
+                    }
+
+                    return;
+
+                    break;
             }
 
-            if (params.device) {
-
-                const device = eval(params.device)
-
-                switch (typeof params.command) {
-                    case 'object':
-
-                        /*
-                        * TCP commands should be sent step by step,
-                        * with micro latency
-                        * */
-
-                        let iteration = 0,
-                            cmd = params.command;
-                        for (let i = 0; i < cmd.length; i++) {
-                            setTimeout(function () {
-                                device.connection.write(cmd[iteration] + '\r\n');
-                                iteration++;
-                            }, i * 50)
-                        }
-
-                        break;
-                    case 'string':
-
-
-                        console.log(chalk.redBright(params.command))
-
-                        device.send(params.command + '\r\n').then(response => {
-                            console.log(chalk.redBright(response))
-
-                            if (response)
-                                return resolve(response);
-
-                            return resolve();
-                        })
-                        break;
-                }
-
-                return;
-
-            }
-
-            console.log(chalk.white.bgBlue.bold(this.constructor.name))
-            console.log(chalk.white.bgRed.bold(' PROCESS TCP PARAMS '))
-            //console.log(chalk.red(params.command + typeof params.command))
-
-            //console.log(params)
+            console.log(chalk.white.bgRed.bold(' SWITCH AFTER ACTIONS '))
 
             if (!params.connection.connector) {
                 console.log(chalk.red('REJECTED: Connection is impossible. Check both IP and Port'))
@@ -946,8 +998,6 @@ class tcpProcessor {
                             cmd = params.command;
                         for (let i = 0; i < cmd.length; i++) {
                             setTimeout(function () {
-                                // console.log(chalk.green(iteration))
-                                // console.log(chalk.red(cmd[iteration]))
 
                                 params.connection.connector.write(cmd[iteration] + "\r\n");
 
@@ -958,17 +1008,6 @@ class tcpProcessor {
                         break;
                     case 'string':
 
-                        //console.log(chalk.bgYellow.red.bold('ALARM STRING'))
-                        /*
-                        * I think send hex to net package is not necessary
-                        * */
-                        /*if (params.command.match(/HEX:/)) {
-                            params.command = params.command.replace('HEX:', '');
-
-                            console.log(chalk.red.bold(stringToHex(params.command)))
-
-                            params.connection.connector.write(params.command + "\r");
-                        } else {}*/
                         params.connection.connector.write(params.command + "\r\n");
 
                         break;
