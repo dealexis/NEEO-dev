@@ -35,18 +35,6 @@ class ProcessingManager {
         console.log(chalk.white.bgBlue.bold(' CLASS: Processing Manager '))
         console.log(chalk.white.bgBlue.bold(' METHOD: initiate'))
 
-        //console.log(connection.command);
-
-        // console.log(chalk.green(f + ':') + params[f])
-        // //console.log('VALUE:' + params[f])
-        // console.log(typeof params[f]);
-        // if(typeof params[f] == 'object'){
-        //     params[f].forEach((element, index) => {
-        //         console.log(chalk.red.bold('[' + index + '] = ' + element))
-        //     })
-        // }
-
-
         return new Promise((resolve, reject) => {
             this._processor.initiate(connection)
                 .then((result) => {
@@ -59,28 +47,11 @@ class ProcessingManager {
     process(params) {
         return new Promise((resolve, reject) => {
 
-            // console.log('-------------------------')
-            //
-            // console.log(chalk.white.bgBlue.bold(" CLASS: ProcessingManager "))
-            // console.log("METHOD: process")
-            // console.log(chalk.white.bgBlue.bold(' PARAMS '))
-            /*for (var f in params) {
-                //console.log(chalk.green(f + ':') + params[f])
-                //console.log('VALUE:' + params[f])
-                //console.log(params[f]);
-                //console.log(typeof params[f]);
-                // if(typeof params[f] == 'object'){
-                //     params[f].forEach((element, index) => {
-                //         console.log(chalk.red.bold('[' + index + '] = ' + element))
-                //     })
-                // }
-            }*/
-
             console.log(chalk.black.bgRedBright.bold(' THIS PROCESSOR: ') + this._processor.constructor.name);
 
             this._processor.process(params)
                 .then((result) => {
-                    console.log(chalk.bgGreen('RESULT:') + result);
+                    //console.log(chalk.bgGreen('RESULT:') + result);
                     resolve(result);
                 })
                 .catch((err) => {
@@ -128,11 +99,6 @@ class httprestProcessor {
     process(params) {
         return new Promise(function (resolve, reject) {
             try {
-                // if (typeof (params.command) == 'string') {
-                //     console.log('MEGA PROCESS: ' + params.headers);
-                //     params.command = JSON.parse(params.command);
-                //     params.headers = JSON.parse(params.headers);
-                // }
                 if (params.command.verb == 'post') {
                     got.post(params.command.call, {json: params.command.message, responseType: 'json'})
                         .then((response) => {
@@ -169,7 +135,6 @@ class httprestProcessor {
     }
 
     query(params) {
-        console.log('MEGA QUERY:' + params.headers)
         return new Promise(function (resolve, reject) {
             if (params.query) {
                 try {
@@ -264,14 +229,6 @@ class httpgetProcessor {
                 .catch((err) => {
                     reject(err);
                 });
-
-            // http(params.command)
-            //     .then(function (result) {
-            //         resolve(result.data);
-            //     })
-            //     .catch((err) => {
-            //         reject(err);
-            //     });
         });
     }
 
@@ -885,8 +842,8 @@ class tcpProcessor {
                     let cmd = _device.send(packet);
 
                     cmd.then(response => {
-                        console.log(chalk.redBright('PACKET RESPONSE'))
-                        console.log(chalk.redBright(response))
+                        // console.log(chalk.redBright('PACKET RESPONSE'))
+                        // console.log(chalk.redBright(response))
                         resolve(response);
                     }).catch(error => {
                         reject(error);

@@ -173,7 +173,7 @@ class Samsung extends DeviceFather {
 
         this.init() //init new connection
 
-        console.log(chalk.whiteBright(command))
+        //console.log(chalk.whiteBright(command))
 
         let error = false;
         await this.connection.write(command, function (e) {

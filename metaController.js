@@ -139,6 +139,13 @@ module.exports = function controller(driver) {
     };
 
     this.addSliderHelper = function (deviceId, listen, evaldo, slidername) {//function called by the MetaDriver to store
+
+        console.log(chalk.redBright('Add Slider'))
+        // console.log(chalk.redBright(slidername))
+        // console.log(chalk.redBright(listen))
+        // console.log(chalk.redBright(deviceId))
+        // console.log(chalk.redBright(JSON.stringify(evaldo)))
+
         const indent = self.sliderH.findIndex((elt) => {
             return (elt.name == slidername && elt.deviceId == deviceId);
         });

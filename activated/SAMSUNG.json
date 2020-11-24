@@ -2,7 +2,7 @@
   "name": "SAMSUNG",
   "manufacturer": "Katana Networks",
   "type": "TV",
-  "version": 8,
+  "version": 11,
   "variables": {
     "IP": "192.168.1.157",
     "Port": 9197,
@@ -24,7 +24,7 @@
     "dynamicname": "SAMSUNG",
     "dynamicid": "samsung",
     "manufacturer": "Katana",
-    "version": 4,
+    "version": 6,
     "type": "TV",
     "variables": {
       "isOn": false,
@@ -93,6 +93,12 @@
         "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,21,22,64,22,21,22,21,22,64,22,21,22,21,22,21,22,64,22,21,22,64,22,64,22,21,22,64,22,64,22,64,22,1820",
         "device": "GC"
       },
+      "HDMI 1": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,173,173,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,21,21,21,21,65,21,21,21,65,21,65,21,65,21,21,21,65,21,65,21,21,21,65,21,21,21,21,21,21,21,1832",
+        "device": "GC"
+      },
       "VOLUME UP": {
         "label": "",
         "type": "static",
@@ -155,7 +161,14 @@
             ],
             "device": "SamsungTV"
           }
-        }
+        },
+        "evaldo": [
+          {
+            "test": "DYNAMIK (\"$Result\".toString().match(/Action Failed/)) ? \"true\" : \"\"",
+            "then": "__PAIR",
+            "or": ""
+          }
+        ]
       },
       "__GETVOLUME": {
         "label": "",
@@ -192,9 +205,14 @@
         "command": "",
         "evaldo": [
           {
-            "test": "DYNAMIK (\"$isOn\" == \"true\") ? true : false",
-            "then": "",
-            "or": "__TURN ON"
+            "test": true,
+            "then": "__TURN ON",
+            "or": ""
+          },
+          {
+            "test": true,
+            "then": "INITIALISE",
+            "or": ""
           }
         ]
       },
@@ -219,6 +237,13 @@
           {
             "variable": "isOn",
             "value": false
+          }
+        ],
+        "evaldo": [
+          {
+            "test": true,
+            "then": "CLEANUP",
+            "or": ""
           }
         ]
       },

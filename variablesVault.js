@@ -3,6 +3,7 @@ const fs = require('fs');
 const {templateSettings} = require('lodash');
 const INTERNALNAMESEPARATOR = '_@_';
 const variablePattern = {'pre': '$', 'post': ''};
+const chalk = require('chalk')
 
 
 function toInternalName(name, deviceId) {
@@ -102,6 +103,12 @@ class variablesVault {
             }
         */
         this.addObserver = function (name, theFunction, deviceId, componentRegistering) { // who listen to variable changes.
+
+            console.log(chalk.redBright('Add observer'))
+            console.log(chalk.redBright(name))
+            console.log(chalk.redBright(theFunction))
+            console.log(chalk.redBright(deviceId))
+
             try {
                 let internalVariableName = toInternalName(name, deviceId);
                 if (name != undefined && name != '' && theFunction != undefined && theFunction) {
