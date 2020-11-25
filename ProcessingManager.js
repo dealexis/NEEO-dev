@@ -922,7 +922,7 @@ class tcpProcessor {
 
                             console.log(chalk.redBright(params.command))
 
-                            _device.send(params.command + '\r\n').then(response => {
+                            _device.send(params.command).then(response => {
                                 console.log(chalk.redBright(response))
 
                                 if (response)

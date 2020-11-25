@@ -2,7 +2,7 @@
   "name": "SAMSUNG",
   "manufacturer": "Katana Networks",
   "type": "TV",
-  "version": 11,
+  "version": 13,
   "variables": {
     "IP": "192.168.1.157",
     "Port": 9197,
@@ -28,7 +28,10 @@
     "type": "TV",
     "variables": {
       "isOn": false,
-      "Volume": 10
+      "Volume": 10,
+      "isAudioOut": false,
+      "TVAudioLevel": 10,
+      "OutAudioLevel": 10
     },
     "sliders": {
       "VOLUME": {
@@ -40,6 +43,19 @@
             "test": true,
             "then": "__SETVOLUME",
             "or": ""
+          }
+        ]
+      }
+    },
+    "switches": {
+      "AudioSwitch": {
+        "label": "",
+        "listen": "isAudioOut",
+        "evaldo": [
+          {
+            "test": "DYNAMIK $Result",
+            "then": "SET AUDIO OUT",
+            "or": "SET AUDIO IN"
           }
         ]
       }
@@ -111,9 +127,9 @@
         ],
         "evaldo": [
           {
-            "test": true,
-            "then": "__SETVOLUME",
-            "or": ""
+            "test": false,
+            "then": "",
+            "or": "__SETVOLUME"
           }
         ]
       },
@@ -129,9 +145,9 @@
         ],
         "evaldo": [
           {
-            "test": true,
-            "then": "__SETVOLUME",
-            "or": ""
+            "test": false,
+            "then": "",
+            "or": "__SETVOLUME"
           }
         ]
       },
@@ -158,6 +174,35 @@
               "Expect: 100-continue\r\n",
               "\r\n",
               "<?xml version=\"1.0\" encoding=\"utf-8\"?><s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:SetVolume xmlns:u=\"urn:schemas-upnp-org:service:RenderingControl:1\"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>$Volume</DesiredVolume></u:SetVolume></s:Body></s:Envelope>\r\n"
+            ],
+            "device": "SamsungTV"
+          }
+        },
+        "evaldo": [
+          {
+            "test": "DYNAMIK (\"$Result\".toString().match(/Action Failed/)) ? \"true\" : \"\"",
+            "then": "__PAIR",
+            "or": ""
+          }
+        ]
+      },
+      "SET TV VOLUME 0": {
+        "label": "",
+        "type": "tcp",
+        "command": {
+          "send": {
+            "packet": [
+              "POST /upnp/control/RenderingControl1 HTTP/1.1\r\n",
+              "HOST: $IP:$Port\r\n",
+              "Accept: */*\r\n",
+              "CONTENT-LENGTH: 361\r\n",
+              "CONTENT-TYPE: text/xml; charset=\"utf-8\"\r\n",
+              "USER-AGENT: NEEO REMOTE One\r\n",
+              "X-MRCP-ID: 70:B3:D5:22:64:05\r\n",
+              "SOAPACTION: \"urn:schemas-upnp-org:service:RenderingControl:1#SetVolume\"\r\n",
+              "Expect: 100-continue\r\n",
+              "\r\n",
+              "<?xml version=\"1.0\" encoding=\"utf-8\"?><s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:SetVolume xmlns:u=\"urn:schemas-upnp-org:service:RenderingControl:1\"><InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>0</DesiredVolume></u:SetVolume></s:Body></s:Envelope>\r\n"
             ],
             "device": "SamsungTV"
           }
@@ -220,25 +265,13 @@
         "label": "",
         "type": "tcp",
         "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,172,172,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,64,22,64,22,21,22,21,22,21,22,21,22,21,22,64,22,21,22,21,22,64,22,64,22,21,22,21,22,64,22,21,22,64,22,64,22,21,22,21,22,64,22,64,22,21,22,1820",
-        "device": "GC",
-        "evalwrite": [
-          {
-            "variable": "isOn",
-            "value": true
-          }
-        ]
+        "device": "GC"
       },
       "POWER OFF": {
         "label": "",
         "type": "tcp",
         "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,173,173,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,21,21,21,21,65,21,65,21,65,21,65,21,21,21,21,21,65,21,65,21,21,21,1832",
         "device": "GC",
-        "evalwrite": [
-          {
-            "variable": "isOn",
-            "value": false
-          }
-        ],
         "evaldo": [
           {
             "test": true,
@@ -262,6 +295,36 @@
             "device": "SamsungTV"
           }
         }
+      },
+      "SET AUDIO OUT": {
+        "label": "",
+        "type": "tcp",
+        "command": [
+          "set MTX:Index_501 0 0 1",
+          "set MTX:Index_502 0 0 2"
+        ],
+        "device": "MRX",
+        "evaldo": [
+          {
+            "test": true,
+            "then": "SET TV VOLUME 0"
+          }
+        ]
+      },
+      "SET AUDIO IN": {
+        "label": "",
+        "type": "tcp",
+        "command": [
+          "set MTX:Index_501 0 0 3",
+          "set MTX:Index_502 0 0 4"
+        ],
+        "device": "MRX",
+        "evaldo": [
+          {
+            "test": true,
+            "then": "RETURN TV VOLUME"
+          }
+        ]
       }
     }
   }

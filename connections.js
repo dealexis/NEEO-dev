@@ -119,6 +119,10 @@ class CiscoJAD extends DeviceFather {
             console.log('device: ' + ip + ' END');
         });
 
+        device.on('error', function (error) {
+            console.log('device: ' + ip + '\n' + chalk.red(error))
+        })
+
         this.connection = device;
 
     }
@@ -204,3 +208,48 @@ class Samsung extends DeviceFather {
 
 // const SamsungTV7677Export = new SamsungTV7677('192.168.1.156', 7677);
 exports.SamsungTV = new Samsung();
+
+class MRX extends DeviceFather {
+    init(ip, port) {
+        console.log('init:' + this.constructor.name);
+        this.ip = ip;
+        this.port = port;
+        this.chunk = 'default';
+        const device = new Net.Socket();
+
+        device.connect({
+            port,
+            host: ip
+        });
+
+        let thisObject = this;
+
+        device.on('connect', function () {
+            console.log('device: ' + ip + ' connected');
+            thisObject.send('devstatus runmode')
+        });
+
+        device.on('data', function (chunk) {
+            console.log('device: ' + ip + '\n' + chalk.red(chunk));
+            thisObject.chunk = chunk;
+
+            //NOTIFY event MTX:SynchronizationSetStatus "inactive"
+            if (chunk.toString().match(/inactive/)) {
+                device.connect();
+            }
+
+        });
+
+        device.on('end', function () {
+            console.log('device: ' + ip + ' END');
+        });
+
+        device.on('error', function (error) {
+            console.log('device: ' + ip + '\n' + chalk.red(error))
+        })
+
+        this.connection = device;
+    }
+}
+
+exports.MRX = new MRX('192.168.1.30', 49280);
