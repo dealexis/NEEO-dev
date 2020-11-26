@@ -60,8 +60,7 @@ class DeviceFather {
         await delay(250)
 
         if (error) throw new Error(error);
-
-        console.log(chalk.green(this.chunk))
+        //console.log(chalk.green(this.chunk))
 
         return this.chunk.toString();
 
@@ -73,6 +72,45 @@ class DeviceFather {
 
     getPort() {
         return this.port;
+    }
+
+    PercentToValue(percent) {
+        if (!percent)
+            return "-Inf";
+        var VolumeRange = 7000;
+        percent = percent / 100;
+        return Math.floor((VolumeRange * percent - 6000) / 5) * 5;
+    }
+
+    ValueToPercent(MRXVolume) {
+        MRXVolume = parseInt(MRXVolume)
+        var MRXRange = 7000,
+            percent;
+        MRXVolume = MRXVolume + 6000;
+        percent = Math.floor((MRXVolume / MRXRange) * 100);
+        return percent;
+    }
+
+    stringToHex(text) {
+        var bytes = [];
+
+        for (var i = 0; i < text.length; i++) {
+            var realBytes = unescape(encodeURIComponent(text[i]));
+            for (var j = 0; j < realBytes.length; j++) {
+                bytes.push(realBytes[j].charCodeAt(0));
+            }
+        }
+
+        var converted = [];
+        for (var i = 0; i < bytes.length; i++) {
+            var byte = bytes[i].toString(16);
+            byte = "0x" + byte;
+            converted.push(byte);
+        }
+
+        converted.push(0x0a);
+
+        return converted.join(', ');
     }
 
 }
@@ -210,6 +248,10 @@ class Samsung extends DeviceFather {
 exports.SamsungTV = new Samsung();
 
 class MRX extends DeviceFather {
+    constructor(ip, port) {
+        super(ip, port);
+    }
+
     init(ip, port) {
         console.log('init:' + this.constructor.name);
         this.ip = ip;
@@ -250,6 +292,33 @@ class MRX extends DeviceFather {
 
         this.connection = device;
     }
+
+    async send(command) {
+
+        console.log(chalk.redBright('send mrx:' + command))
+        let matched_cmd = command.match(/set MTX:Index_[0-9]* 0 0 /);
+        if (matched_cmd) {
+            let value = this.PercentToValue(command.replace(/set MTX:Index_[0-9]* 0 0 /, ''));
+
+            command = matched_cmd + value;
+
+            console.log(command)
+        }
+
+        let error = false;
+        await this.connection.write(command + '\r\n', function (e) {
+            if (typeof e !== 'undefined') error = e;
+        });
+
+        await delay(250);
+
+        if (error) throw new Error(error);
+        console.log(chalk.green(this.chunk))
+
+        return this.chunk.toString();
+
+    }
+
 }
 
 exports.MRX = new MRX('192.168.1.30', 49280);

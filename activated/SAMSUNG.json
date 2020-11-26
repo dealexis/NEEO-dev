@@ -2,7 +2,7 @@
   "name": "SAMSUNG",
   "manufacturer": "Katana Networks",
   "type": "TV",
-  "version": 13,
+  "version": 14,
   "variables": {
     "IP": "192.168.1.157",
     "Port": 9197,
@@ -40,9 +40,9 @@
         "listen": "Volume",
         "evaldo": [
           {
-            "test": true,
-            "then": "__SETVOLUME",
-            "or": ""
+            "test": "DYNAMIK $isAudioOut",
+            "then": "__SETMRXVOLUME",
+            "or": "__SETVOLUME"
           }
         ]
       }
@@ -54,8 +54,8 @@
         "evaldo": [
           {
             "test": "DYNAMIK $Result",
-            "then": "SET AUDIO OUT",
-            "or": "SET AUDIO IN"
+            "then": "__SET AUDIO OUT",
+            "or": "__SET AUDIO IN"
           }
         ]
       }
@@ -115,6 +115,18 @@
         "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,173,173,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,21,21,21,21,65,21,21,21,65,21,65,21,65,21,21,21,65,21,65,21,21,21,65,21,21,21,21,21,21,21,1832",
         "device": "GC"
       },
+      "HDMI 2": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,173,173,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,65,21,65,21,65,21,21,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,21,21,1832",
+        "device": "GC"
+      },
+      "HDMI 3": {
+        "label": "",
+        "type": "tcp",
+        "command": "sendir,$ModNum:$NumPort,$ID,38000,1,1,173,173,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,65,21,65,21,65,21,21,21,21,21,21,21,21,21,21,21,21,21,65,21,21,21,21,21,21,21,21,21,65,21,65,21,65,21,21,21,65,21,65,21,65,21,65,21,21,21,21,21,1832",
+        "device": "GC"
+      },
       "VOLUME UP": {
         "label": "",
         "type": "static",
@@ -127,8 +139,8 @@
         ],
         "evaldo": [
           {
-            "test": false,
-            "then": "",
+            "test": "DYNAMIK $isAudioOut",
+            "then": "__SETMRXVOLUME",
             "or": "__SETVOLUME"
           }
         ]
@@ -145,8 +157,8 @@
         ],
         "evaldo": [
           {
-            "test": false,
-            "then": "",
+            "test": "DYNAMIK $isAudioOut",
+            "then": "__SETMRXVOLUME",
             "or": "__SETVOLUME"
           }
         ]
@@ -178,6 +190,12 @@
             "device": "SamsungTV"
           }
         },
+        "evalwrite": [
+          {
+            "variable": "TVAudioLevel",
+            "value": "$Volume"
+          }
+        ],
         "evaldo": [
           {
             "test": "DYNAMIK (\"$Result\".toString().match(/Action Failed/)) ? \"true\" : \"\"",
@@ -186,7 +204,19 @@
           }
         ]
       },
-      "SET TV VOLUME 0": {
+      "__SETMRXVOLUME": {
+        "label": "",
+        "type": "tcp",
+        "command": "set MTX:Index_403 0 0 $Volume",
+        "device": "MRX",
+        "evalwrite": [
+          {
+            "variable": "OutAudioLevel",
+            "value": "$Volume"
+          }
+        ]
+      },
+      "__SET TV VOLUME 0": {
         "label": "",
         "type": "tcp",
         "command": {
@@ -239,7 +269,7 @@
         "queryresult": "$.",
         "evalwrite": [
           {
-            "variable": "Volume",
+            "variable": "TVAudioLevel",
             "value": "DYNAMIK \"$Result\".match(/<CurrentVolume>[0-9]*/)[0].replace('<CurrentVolume>', '')"
           }
         ]
@@ -296,22 +326,7 @@
           }
         }
       },
-      "SET AUDIO OUT": {
-        "label": "",
-        "type": "tcp",
-        "command": [
-          "set MTX:Index_501 0 0 1",
-          "set MTX:Index_502 0 0 2"
-        ],
-        "device": "MRX",
-        "evaldo": [
-          {
-            "test": true,
-            "then": "SET TV VOLUME 0"
-          }
-        ]
-      },
-      "SET AUDIO IN": {
+      "__SET AUDIO OUT": {
         "label": "",
         "type": "tcp",
         "command": [
@@ -322,7 +337,65 @@
         "evaldo": [
           {
             "test": true,
-            "then": "RETURN TV VOLUME"
+            "then": "__SET TV VOLUME 0",
+            "or": ""
+          },
+          {
+            "test": true,
+            "then": "__RETURN MRX VOLUME",
+            "or": ""
+          }
+        ]
+      },
+      "__SET AUDIO IN": {
+        "label": "",
+        "type": "tcp",
+        "command": [
+          "set MTX:Index_501 0 0 1",
+          "set MTX:Index_502 0 0 2"
+        ],
+        "device": "MRX",
+        "evaldo": [
+          {
+            "test": true,
+            "then": "__RETURN TV VOLUME",
+            "or": ""
+          }
+        ]
+      },
+      "__RETURN TV VOLUME": {
+        "label": "",
+        "type": "static",
+        "command": "",
+        "evalwrite": [
+          {
+            "variable": "Volume",
+            "value": "$TVAudioLevel"
+          }
+        ],
+        "evaldo": [
+          {
+            "test": true,
+            "then": "__SETVOLUME",
+            "or": ""
+          }
+        ]
+      },
+      "__RETURN MRX VOLUME": {
+        "label": "",
+        "type": "static",
+        "command": "",
+        "evalwrite": [
+          {
+            "variable": "Volume",
+            "value": "$OutAudioLevel"
+          }
+        ],
+        "evaldo": [
+          {
+            "test": true,
+            "then": "__SETMRXVOLUME",
+            "or": ""
           }
         ]
       }

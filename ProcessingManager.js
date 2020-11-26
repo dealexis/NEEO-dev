@@ -914,6 +914,7 @@ class tcpProcessor {
                                 setTimeout(function () {
                                     _device.connection.write(cmd[iteration] + '\r\n');
                                     iteration++;
+                                    if (i === cmd.length - 1) resolve('command end')
                                 }, i * 50)
                             }
 
